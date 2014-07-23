@@ -3,6 +3,7 @@ var Graphics = {
         this.canvas = canvas;
         this.initGL();
         this.modelViewMatrix = mat4.create();
+        this.modelViewStack = [];
         this.projectionMatrix = mat4.create();
         this.initShaders(initBuffers);
         function initBuffers() {
@@ -16,30 +17,41 @@ var Graphics = {
     },
 
     redraw : function() {
+        this.cube.rotate(0, 5, 0);
+
         this.gl.viewport(0, 0, this.width, this.height);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         mat4.perspective(this.projectionMatrix, 45, this.width / this.height, 0.1, 100.0);
         mat4.identity(this.modelViewMatrix); //Einheitsmatrix
 
-        mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [0.0, 0.0, -7.0]);
-        this.drawModel(this.cube);
+        this.drawEntity(this.cube);
 
         window.requestAnimationFrame(function() {
             Graphics.redraw();
         });
     },
 
-    drawModel : function(model) {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, model.buffer);
-        this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, model.dimension, this.gl.FLOAT, false, 0, 0);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, model.color);
+    drawEntity : function(entity) {
+
+        this.push();
+        mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [entity.position.x, entity.position.y, entity.position.z]);
+        this.push();
+        mat4.rotateX(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.x));
+        mat4.rotateY(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.y));
+        mat4.rotateZ(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.z));
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.buffer);
+        this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, entity.model.dimension, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.color);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);
         this.setMatrixUniforms();
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, model.vertexCount);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, entity.model.vertexCount);
+        this.pop();
+        this.pop();
     },
 
     initBuffers : function(callback) {
-        this.cube = new ModelCube();
+        this.cube = new Entity(new ModelCube());
+        this.cube.setPosition(0, 0, -7);
         callback();
     },
 
@@ -53,12 +65,22 @@ var Graphics = {
             console.log(e);
         }
         if(!this.gl) {
-            console.error("Unable to initialise WebGL");
+            console.error("Unable to initialize WebGL");
         }
     },
 
-    popMatrix : function() {
+    pop : function() {
+        if(this.modelViewStack.length == 0) {
+            throw "Could not pop on empty stack!";
+        }
+        else {
+            this.modelViewMatrix = this.modelViewStack.pop();
+        }
+    },
 
+    push : function() {
+        var tmp = mat4.clone(this.modelViewMatrix);
+        this.modelViewStack.push(tmp);
     },
 
     initShaders : function(callback) {
@@ -142,3 +164,8 @@ var Graphics = {
         });
     }
 };
+
+
+function degToRad(degree) {
+    return (2*Math.PI)/360 * degree;
+}
