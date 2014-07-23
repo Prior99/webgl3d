@@ -32,6 +32,8 @@ var Graphics = {
     drawModel : function(model) {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, model.buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, model.dimension, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, model.color);
+        this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);
         this.setMatrixUniforms();
         this.gl.drawArrays(this.gl.TRIANGLES, 0, model.vertexCount);
     },
@@ -82,8 +84,8 @@ var Graphics = {
             Graphics.shaderProgram.vertexPositionAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aVertexPosition");
             gl.enableVertexAttribArray(Graphics.shaderProgram.vertexPositionAttribute);
 
-            //Graphics.shaderProgram.vertexColorAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aVertexColor");
-            //gl.enableVertexAttribArray(Graphics.shaderProgram.vertexColorAttribute);
+            Graphics.shaderProgram.vertexColorAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aVertexColor");
+            gl.enableVertexAttribArray(Graphics.shaderProgram.vertexColorAttribute);
 
             Graphics.shaderProgram.projectionMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uProjectionMatrix");
             Graphics.shaderProgram.modelViewMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uModelViewMatrix");
