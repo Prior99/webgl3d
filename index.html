@@ -11,10 +11,34 @@
 
     </head>
     <body>
-        <canvas width="500" height="500" id="canvas"/>
+        <canvas width="500" height="500"/>
         <script>
             $(function() {
-                Graphics.start();
+                var models = [{
+                    name : "cube",
+                    url : "models/cube.js"
+                }];
+
+                Graphics.init($("canvas")[0], loadModels);
+
+                function loadModels() {
+                    console.log("Graphics initialized!");
+                    Graphics.loadModels(models, start);
+                }
+
+                function start(models) {
+                    console.log("Models Loaded!");
+
+                    var cube = new Entity(models["cube"]);
+                    cube.attach();
+                    cube.setPosition(0, 0, -7);
+                    Graphics.addRenderTickHandler(function() {
+                        cube.rotate(1, 0, 0);
+                    });
+
+                    console.log("Starting...");
+                    Graphics.start();
+                }
             });
         </script>
     </body>

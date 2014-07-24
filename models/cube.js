@@ -1,4 +1,4 @@
-var ModelCube = function() {
+function ModelCube() {
     var gl = Graphics.gl;
 
     this.buffer = gl.createBuffer();
@@ -75,4 +75,4 @@ var ModelCube = function() {
     ]
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexes), gl.STATIC_DRAW);
     this.indexCount = 36;
-};
+}

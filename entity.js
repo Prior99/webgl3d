@@ -35,5 +35,13 @@ Entity.prototype = {
         this.position.x = x;
         this.position.y = y;
         this.position.z = z;
-    }
+    },
+
+    attach : function() {
+        Graphics.addEntity(this);
+    },
+
+    detach : function() {
+        Graphics.removeEntity(this);
+    },
 }

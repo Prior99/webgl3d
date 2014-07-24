@@ -1,29 +1,74 @@
 var Graphics = {
-    start : function(canvas) {
+    init : function(canvas, callback) {
         this.canvas = canvas;
         this.initGL();
         this.modelViewMatrix = mat4.create();
         this.modelViewStack = [];
         this.projectionMatrix = mat4.create();
-        this.initShaders(initBuffers);
-        function initBuffers() {
-            Graphics.initBuffers(startRenderLoop);
-        }
-        function startRenderLoop() {
-            Graphics.gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            Graphics.gl.enable(Graphics.gl.DEPTH_TEST); //So things behind other things are hidden
-            Graphics.redraw();
+        this.initShaders(callback);
+        this.entities = [];
+        this.renderTickHandlers = [];
+    },
+
+    addRenderTickHandler : function(handler) {
+        this.renderTickHandlers.push(handler);
+    },
+
+    start : function() {
+        this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        this.gl.enable(Graphics.gl.DEPTH_TEST); //So things behind other things are hidden
+        this.gl.viewport(0, 0, this.width, this.height);
+        this.redraw();
+    },
+
+    addEntity : function(entity) {
+        this.entities.push(entity);
+    },
+
+    removeEntity : function(entity) {
+        var i;
+        if(i = this.entities.indexOf(entity) != -1) {
+            this.entities.splice(i, 1);
         }
     },
 
+    loadModels : function(models, callback) {
+        var models2 = models.slice();
+        var result = {};
+        (function recurse() {
+            if(models2.length == 0) {
+                callback(result);
+            }
+            else {
+                var model = models2.pop();
+                $.ajax({
+                    url : model.url,
+                    dataType : "text",
+                    success : function(data) {
+                        var m = eval("(" + data + ")");
+                        model.model = new m();
+                        console.log("Model " + model.url + " loaded!");
+                        result[model.name] = model.model;
+                        recurse();
+                    }
+                });
+            }
+        })();
+    },
+
     redraw : function() {
-        this.cube.rotate(5, 0, 0);
-        this.gl.viewport(0, 0, this.width, this.height);
+        for(var i in this.renderTickHandlers) {
+            this.renderTickHandlers[i]();
+        }
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         mat4.perspective(this.projectionMatrix, 45, this.width / this.height, 0.1, 100.0);
         mat4.identity(this.modelViewMatrix); //Einheitsmatrix
 
-        this.drawEntity(this.cube);
+        for(var i in this.entities) {
+            var e = this.entities[i];
+            this.drawEntity(e);
+            if(e.tick) e.tick();
+        }
 
         window.requestAnimationFrame(function() {
             Graphics.redraw();
@@ -38,33 +83,25 @@ var Graphics = {
         mat4.rotateX(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.x));
         mat4.rotateY(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.y));
         mat4.rotateZ(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.z));
-
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, entity.model.dimension, this.gl.FLOAT, false, 0, 0);
-
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.color);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);
-
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indexBuffer);
-
         this.setMatrixUniforms();
-        this.gl.drawElements(this.gl.TRIANGLES, entity.model.indexCount, this.gl.UNSIGNED_SHORT, 0);
-
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, entity.model.vertexCount);
         this.pop();
         this.pop();
     },
 
     initBuffers : function(callback) {
-        this.cube = new Entity(new ModelCube());
-        this.cube.setPosition(0, 0, -7);
         callback();
     },
 
     initGL : function() {
         try {
-            Graphics.gl = canvas.getContext("experimental-webgl");
-            this.width = canvas.width;
-            this.height = canvas.height;
+            Graphics.gl = this.canvas.getContext("experimental-webgl");
+            this.width = this.canvas.width;
+            this.height = this.canvas.height;
         }
         catch(e) {
             console.log(e);
