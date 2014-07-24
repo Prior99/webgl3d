@@ -9,6 +9,7 @@ var Graphics = {
         this.entities = [];
         this.renderTickHandlers = [];
         this.textures = {};
+        this.root = new Entity(null);
     },
 
     loadTexture : function(url, callback) {
@@ -45,14 +46,11 @@ var Graphics = {
     },
 
     addEntity : function(entity) {
-        this.entities.push(entity);
+        this.root.attachChild(entity);
     },
 
     removeEntity : function(entity) {
-        var i;
-        if(i = this.entities.indexOf(entity) != -1) {
-            this.entities.splice(i, 1);
-        }
+        this.root.detachChild(entity);
     },
 
     loadModels : function(models, callback) {
@@ -118,11 +116,7 @@ var Graphics = {
         mat4.perspective(this.projectionMatrix, 45, this.width / this.height, 0.1, 100.0);
         mat4.identity(this.modelViewMatrix); //Einheitsmatrix
 
-        for(var i in this.entities) {
-            var e = this.entities[i];
-            this.drawEntity(e);
-            if(e.tick) e.tick();
-        }
+        this.drawEntity(this.root);
 
         window.requestAnimationFrame(function() {
             Graphics.redraw();
@@ -130,28 +124,32 @@ var Graphics = {
     },
 
     drawEntity : function(entity) {
-
+        if(entity.tick) entity.tick();
         this.push();
         mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [entity.position.x, entity.position.y, entity.position.z]);
         this.push();
         mat4.rotateX(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.x));
         mat4.rotateY(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.y));
         mat4.rotateZ(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.z));
+        if(entity.model) {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.vertices);
+            this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.vertices);
-        this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.textureCoordinates);
+            this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.textureCoordinates);
-        this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
+            this.gl.activeTexture(this.gl.TEXTURE0);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, entity.model.texture);
+            this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
 
-        this.gl.activeTexture(this.gl.TEXTURE0);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, entity.model.texture);
-        this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indices);
 
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indices);
-
-        this.setMatrixUniforms();
-        this.gl.drawElements(this.gl.TRIANGLES, entity.model.indexCount, this.gl.UNSIGNED_SHORT, 0);
+            this.setMatrixUniforms();
+            this.gl.drawElements(this.gl.TRIANGLES, entity.model.indexCount, this.gl.UNSIGNED_SHORT, 0);
+        }
+        for(var i in entity.children) {
+            Graphics.drawEntity(entity.children[i]);
+        }
         this.pop();
         this.pop();
     },

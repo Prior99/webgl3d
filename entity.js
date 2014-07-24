@@ -10,6 +10,8 @@ var Entity = function(model) {
         y : 0,
         z : 0
     }
+    this.children = [];
+    this.parent = null;
 }
 
 Entity.prototype = {
@@ -41,13 +43,28 @@ Entity.prototype = {
         return this;
     },
 
-    attach : function() {
-        Graphics.addEntity(this);
+    attachChild : function(entity) {
+        this.children.push(entity);
+        entity.parent = this;
+        return this;
+    },
+
+    attachTo : function(entity) {
+        entity.attachChild(this);
         return this;
     },
 
     detach : function() {
-        Graphics.removeEntity(this);
+        this.parent.detachChild(this);
         return this;
     },
+
+    detachChild : function(entity) {
+        var i;
+        if(i = this.children.indexOf(entity) != -1) {
+            this.children.splice(i, 1);
+        }
+        entity.parent = null;
+        return this;
+    }
 }

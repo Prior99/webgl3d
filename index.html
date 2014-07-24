@@ -26,26 +26,23 @@
                     console.log("Models Loaded!");
 
                     new Entity(models["junction_quad"])
-                        .attach()
-                        .rotate(30, 0, 0)
+                        .attachTo(Graphics.root)
                         .setPosition(0, 0, -3);
                     new Entity(models["wall"])
-                        .attach()
-                        .rotate(30, 0, 0)
+                        .attachTo(Graphics.root)
                         .setPosition(1, 0, -3);
                     new Entity(models["wall"])
-                        .attach()
-                        .rotate(30, 0, 0)
+                        .attachTo(Graphics.root)
                         .setPosition(-1, 0, -3);
                     new Entity(models["wall"])
-                        .attach()
-                        .rotate(30, 0, 0)
+                        .attachTo(Graphics.root)
                         .setPosition(2, 0, -3);
                     new Entity(models["wall"])
-                        .attach()
-                        .rotate(30, 0, 0)
+                        .attachTo(Graphics.root)
                         .setPosition(-2, 0, -3);
                     Graphics.addRenderTickHandler(function() { //This method will be called on every rendertick
+                        Graphics.root.move(0, 0.01, 0);
+                        Graphics.root.rotate(0, 0.01, 0);
                     });
 
                     console.log("Starting...");
