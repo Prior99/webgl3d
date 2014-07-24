@@ -10,6 +10,10 @@ var Graphics = {
         this.renderTickHandlers = [];
         this.textures = {};
         this.root = new Entity(null);
+        window.addEventListener('resize', function() { //On resize we have to resize our canvas
+            Graphics.resize();
+        }, false);
+        this.resize();
     },
 
     loadTexture : function(url, callback) {
@@ -152,6 +156,11 @@ var Graphics = {
         }
         this.pop();
         this.pop();
+    },
+
+    resize : function() {
+        this.canvas.width = this.width = window.innerWidth; //Set new dimensions on both canvas
+        this.canvas.height = this.height = window.innerHeight;
     },
 
     initBuffers : function(callback) {

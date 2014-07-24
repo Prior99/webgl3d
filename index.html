@@ -7,7 +7,15 @@
         <script src="graphics.js"></script>
         <script src="jquery-2.1.1.min.js"></script>
         <script src="entity.js"></script>
-
+        <style type="text/css">
+            html, body {
+            	padding: 0;
+            	margin: 0;
+            	width: 100%;
+            	height: 100%;
+                overflow: hidden;
+            }
+        </style>
     </head>
     <body>
         <canvas width="500" height="500"/>
@@ -25,24 +33,23 @@
                 function start(models) {
                     console.log("Models Loaded!");
 
-                    new Entity(models["junction_quad"])
+                    var junct = new Entity(models["junction_quad"])
                         .attachTo(Graphics.root)
                         .setPosition(0, 0, -3);
                     new Entity(models["wall"])
-                        .attachTo(Graphics.root)
-                        .setPosition(1, 0, -3);
+                        .attachTo(junct)
+                        .setPosition(1, 0, 0);
                     new Entity(models["wall"])
-                        .attachTo(Graphics.root)
-                        .setPosition(-1, 0, -3);
+                        .attachTo(junct)
+                        .setPosition(-1, 0, 0);
                     new Entity(models["wall"])
-                        .attachTo(Graphics.root)
-                        .setPosition(2, 0, -3);
+                        .attachTo(junct)
+                        .setPosition(2, 0, 0);
                     new Entity(models["wall"])
-                        .attachTo(Graphics.root)
-                        .setPosition(-2, 0, -3);
+                        .attachTo(junct)
+                        .setPosition(-2, 0, 0);
                     Graphics.addRenderTickHandler(function() { //This method will be called on every rendertick
-                        Graphics.root.move(0, 0.01, 0);
-                        Graphics.root.rotate(0, 0.01, 0);
+                        junct.rotate(0, 0.1, 0);
                     });
 
                     console.log("Starting...");
