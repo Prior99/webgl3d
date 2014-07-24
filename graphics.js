@@ -8,6 +8,29 @@ var Graphics = {
         this.initShaders(callback);
         this.entities = [];
         this.renderTickHandlers = [];
+        this.textures = {};
+    },
+
+    loadTexture : function(url, callback) {
+        var gl = this.gl;
+        var self = this;
+        if(this.textures[url]) return this.textures[url];
+        else {
+            var img = new Image();
+            img.onload = function() {
+                var tex = gl.createTexture();
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+                gl.generateMipmap(gl.TEXTURE_2D);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+                self.textures[url] = tex;
+                callback(tex);
+            }
+            img.src = url;
+        }
     },
 
     addRenderTickHandler : function(handler) {
@@ -35,25 +58,56 @@ var Graphics = {
     loadModels : function(models, callback) {
         var models2 = models.slice();
         var result = {};
-        (function recurse() {
+        var gl = this.gl;
+        function recurse() {
             if(models2.length == 0) {
                 callback(result);
             }
             else {
-                var model = models2.pop();
+                var url = models2.pop();
                 $.ajax({
-                    url : model.url,
+                    url : url,
                     dataType : "text",
-                    success : function(data) {
-                        var m = eval("(" + data + ")");
-                        model.model = new m();
-                        console.log("Model " + model.url + " loaded!");
-                        result[model.name] = model.model;
-                        recurse();
-                    }
+                    success : loadModel
                 });
             }
-        })();
+        }
+        function loadModel(data) {
+            var model = eval("(" + data + ")");
+            var m = {
+                vertices : gl.createBuffer(),
+                textureCoordinates : gl.createBuffer(),
+                indices : gl.createBuffer(),
+                texture : null,
+                name : model.name,
+                vertexCount : model.vertices.length / 3,
+                indexCount : model.indices.length
+            };
+            /*
+             * Load vertices to GPU
+             */
+            gl.bindBuffer(gl.ARRAY_BUFFER, m.vertices);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
+            /*
+             * Load texturecoordinates to GPU
+             */
+            gl.bindBuffer(gl.ARRAY_BUFFER, m.textureCoordinates);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textureCoordinates), gl.STATIC_DRAW);
+            /*
+             * Load indices to GPU
+             */
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.indices);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
+            /*
+             * Load texture
+             */
+            Graphics.loadTexture(model.texture, function(tex) {
+                m.texture = tex;
+                result[model.name] = m;
+                recurse();
+            });
+        }
+        recurse();
     },
 
     redraw : function() {
@@ -84,13 +138,17 @@ var Graphics = {
         mat4.rotateY(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.y));
         mat4.rotateZ(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.z));
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.buffer);
-        this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, entity.model.dimension, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.vertices);
+        this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.color);
-        this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.textureCoordinates);
+        this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
 
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indexBuffer);
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, entity.model.texture);
+        this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
+
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indices);
 
         this.setMatrixUniforms();
         this.gl.drawElements(this.gl.TRIANGLES, entity.model.indexCount, this.gl.UNSIGNED_SHORT, 0);
@@ -153,11 +211,12 @@ var Graphics = {
             Graphics.shaderProgram.vertexPositionAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aVertexPosition");
             gl.enableVertexAttribArray(Graphics.shaderProgram.vertexPositionAttribute);
 
-            Graphics.shaderProgram.vertexColorAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aVertexColor");
-            gl.enableVertexAttribArray(Graphics.shaderProgram.vertexColorAttribute);
+            Graphics.shaderProgram.textureCoordAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aTextureCoord");
+            gl.enableVertexAttribArray(Graphics.shaderProgram.textureCoordAttribute);
 
             Graphics.shaderProgram.projectionMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uProjectionMatrix");
             Graphics.shaderProgram.modelViewMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uModelViewMatrix");
+            Graphics.shaderProgram.samplerUniform = gl.getUniformLocation(Graphics.shaderProgram, "uSampler");
             callback();
         });
     },
