@@ -83,12 +83,17 @@ var Graphics = {
         mat4.rotateX(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.x));
         mat4.rotateY(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.y));
         mat4.rotateZ(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.z));
+
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.buffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, entity.model.dimension, this.gl.FLOAT, false, 0, 0);
+
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.color);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexColorAttribute, 4, this.gl.FLOAT, false, 0, 0);
+
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indexBuffer);
+
         this.setMatrixUniforms();
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, entity.model.vertexCount);
+        this.gl.drawElements(this.gl.TRIANGLES, entity.model.indexCount, this.gl.UNSIGNED_SHORT, 0);
         this.pop();
         this.pop();
     },
