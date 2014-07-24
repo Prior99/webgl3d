@@ -13,7 +13,7 @@
         <canvas width="500" height="500"/>
         <script>
             $(function() {
-                var models = ["models/concreteblock.js"];
+                var models = ["models/junction_quad.js", "models/wall.js"];
 
                 Graphics.init($("canvas")[0], loadModels); //Initialize Graphics
 
@@ -25,11 +25,27 @@
                 function start(models) {
                     console.log("Models Loaded!");
 
-                    var cube = new Entity(models["concrete"]); //Create new Entity with model of cube
-                    cube.attach(); //Attach entity to Graphics
-                    cube.setPosition(0, 0, -5); //Set position to (0, 0, -7)
+                    new Entity(models["junction_quad"])
+                        .attach()
+                        .rotate(30, 0, 0)
+                        .setPosition(0, 0, -3);
+                    new Entity(models["wall"])
+                        .attach()
+                        .rotate(30, 0, 0)
+                        .setPosition(1, 0, -3);
+                    new Entity(models["wall"])
+                        .attach()
+                        .rotate(30, 0, 0)
+                        .setPosition(-1, 0, -3);
+                    new Entity(models["wall"])
+                        .attach()
+                        .rotate(30, 0, 0)
+                        .setPosition(2, 0, -3);
+                    new Entity(models["wall"])
+                        .attach()
+                        .rotate(30, 0, 0)
+                        .setPosition(-2, 0, -3);
                     Graphics.addRenderTickHandler(function() { //This method will be called on every rendertick
-                        cube.rotate(0, 1, 0.5);
                     });
 
                     console.log("Starting...");

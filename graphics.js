@@ -14,7 +14,7 @@ var Graphics = {
     loadTexture : function(url, callback) {
         var gl = this.gl;
         var self = this;
-        if(this.textures[url]) return this.textures[url];
+        if(this.textures[url]) callback(this.textures[url]);
         else {
             var img = new Image();
             img.onload = function() {
