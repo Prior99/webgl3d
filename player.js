@@ -59,7 +59,6 @@ var Player = {
         document.addEventListener("mousemove", function(e) {
             var x = e.movementX || e.webkitMovementX || e.mozMovementX || 0;
             var y = e.movementY || e.webkitMovementY || e.mozMovementY || 0;
-            console.log(x, y);
             Player.rotation.x += y*Player.turnSpeedFactor;
             Player.rotation.y += x*Player.turnSpeedFactor;
         });

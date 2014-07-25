@@ -29,6 +29,8 @@ var Graphics = {
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
                 //gl.generateMipmap(gl.TEXTURE_2D);
                 gl.bindTexture(gl.TEXTURE_2D, null);
                 self.textures[url] = tex;
@@ -100,14 +102,8 @@ var Graphics = {
              */
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.indices);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
-            /*
-             * Load texture
-             */
-            Graphics.loadTexture(model.texture, function(tex) {
-                m.texture = tex;
-                result[model.name] = m;
-                recurse();
-            });
+            result[model.name] = m;
+            recurse();
         }
         recurse();
     },
@@ -147,7 +143,7 @@ var Graphics = {
             this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
 
             this.gl.activeTexture(this.gl.TEXTURE0);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, entity.model.texture);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, entity.texture);
             this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
 
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indices);

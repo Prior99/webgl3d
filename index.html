@@ -30,11 +30,15 @@
                         element.mozRequestPointerLock ||
                         element.webkitRequestPointerLock;
                     element.requestPointerLock();
-                    console.log("MOVE!");
                     $(document).unbind('mousedown', lock);
                 }
                 $(document).mousedown(lock);
-                var models = ["models/junction_quad.js", "models/wall.js", "models/corner.js"];
+                var models = [
+                    "models/junction_quad.js",
+                    "models/wall.js",
+                    "models/corner.js",
+                    "models/floor.js"
+                ];
                 var canvas = $("canvas");
                 Graphics.init(canvas[0], function () {
                     console.log("Graphics initialized!");
@@ -43,13 +47,23 @@
 
                 function start(models) {
                     console.log("Models Loaded!");
+                    for(var x = -3; x < 3; x++) {
+                        for(var y = -3; y < 3; y++) {
+                            new Entity(models["floor"], "tiles.jpg")
+                                .attachTo(Graphics.root)
+                                .setPosition(x, -1, y);
+                            new Entity(models["floor"], "wood.jpg")
+                                .attachTo(Graphics.root)
+                                .setPosition(x, 1, y);
+                        }
+                    }
                     var junct = new Entity(/*models["wall"]*/)
                         .attachTo(Graphics.root);
-                    new Entity(models["corner"])
+                    new Entity(models["wall"], "tiles.jpg")
                         .attachTo(junct)
                         .rotate(0, -90, 0)
                         .setPosition(1, 0, 0);
-                    new Entity(models["corner"])
+                    new Entity(models["wall"], "tiles.jpg")
                         .attachTo(junct)
                         .setPosition(-1, 0, 0);
                     console.log("Starting...");

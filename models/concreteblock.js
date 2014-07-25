@@ -1,5 +1,4 @@
 {
-    texture : "concrete.jpg",
     name : "concrete",
     vertices : [
         -1.0, -1.0,  1.0,//Front

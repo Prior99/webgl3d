@@ -1,5 +1,11 @@
-var Entity = function(model) {
+var Entity = function(model, texture) {
     this.model = model;
+    var self = this;
+    if(texture) {
+        Graphics.loadTexture(texture, function(tex) {
+            self.texture = tex;
+        });
+    }
     this.rotation = {
         x : 0,
         y : 0,

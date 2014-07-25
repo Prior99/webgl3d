@@ -1,6 +1,5 @@
 {
 	name : "corner",
-	texture : "bricks.jpg",
 	vertices : [
 		//Top
 		-.25,  1,  -.5, // 0  0 Long

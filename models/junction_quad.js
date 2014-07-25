@@ -1,5 +1,4 @@
 {
-    texture : "bricks.jpg",
     name : "junction_quad",
     vertices : [
         //Top
