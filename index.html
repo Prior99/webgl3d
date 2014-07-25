@@ -21,7 +21,7 @@
         <canvas width="500" height="500"/>
         <script>
             $(function() {
-                var models = ["models/junction_quad.js", "models/wall.js"];
+                var models = ["models/junction_quad.js", "models/wall.js", "models/corner.js"];
 
                 Graphics.init($("canvas")[0], loadModels); //Initialize Graphics
 
@@ -33,25 +33,21 @@
                 function start(models) {
                     console.log("Models Loaded!");
 
-                    var junct = new Entity(models["junction_quad"])
+                    var junct = new Entity(/*models["wall"]*/)
                         .attachTo(Graphics.root)
                         .setPosition(0, 0, -3);
-                    new Entity(models["wall"])
+                    new Entity(models["corner"])
                         .attachTo(junct)
+                        .rotate(0, -90, 0)
                         .setPosition(1, 0, 0);
-                    new Entity(models["wall"])
+                    new Entity(models["corner"])
                         .attachTo(junct)
                         .setPosition(-1, 0, 0);
-                    new Entity(models["wall"])
-                        .attachTo(junct)
-                        .setPosition(2, 0, 0);
-                    new Entity(models["wall"])
-                        .attachTo(junct)
-                        .setPosition(-2, 0, 0);
-                    Graphics.addRenderTickHandler(function() { //This method will be called on every rendertick
-                        junct.rotate(0, 0.1, 0);
-                    });
 
+                    Graphics.addRenderTickHandler(function() { //This method will be called on every rendertick
+
+                    });
+                    junct.rotate(0, -45, 0);
                     console.log("Starting...");
                     Graphics.start(); //Kick off!
                 }
