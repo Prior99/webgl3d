@@ -7,6 +7,8 @@
         <script src="graphics.js"></script>
         <script src="jquery-2.1.1.min.js"></script>
         <script src="entity.js"></script>
+        <script src="game.js"></script>
+        <script src="player.js"></script>
         <style type="text/css">
             html, body {
             	padding: 0;
@@ -18,24 +20,31 @@
         </style>
     </head>
     <body>
-        <canvas width="500" height="500"/>
+        <canvas width="500" height="500" id="canvas"/>
         <script>
             $(function() {
-                var models = ["models/junction_quad.js", "models/wall.js", "models/corner.js"];
-
-                Graphics.init($("canvas")[0], loadModels); //Initialize Graphics
-
-                function loadModels() {
-                    console.log("Graphics initialized!");
-                    Graphics.loadModels(models, start); //Load all models when initialization is done
+                function lock(e) {
+                    var element = document.getElementById("canvas");
+                    element.requestPointerLock =
+                        element.requestPointerLock ||
+                        element.mozRequestPointerLock ||
+                        element.webkitRequestPointerLock;
+                    element.requestPointerLock();
+                    console.log("MOVE!");
+                    $(document).unbind('mousedown', lock);
                 }
+                $(document).mousedown(lock);
+                var models = ["models/junction_quad.js", "models/wall.js", "models/corner.js"];
+                var canvas = $("canvas");
+                Graphics.init(canvas[0], function () {
+                    console.log("Graphics initialized!");
+                    Graphics.loadModels(models, start);
+                });
 
                 function start(models) {
                     console.log("Models Loaded!");
-
                     var junct = new Entity(/*models["wall"]*/)
-                        .attachTo(Graphics.root)
-                        .setPosition(0, 0, -3);
+                        .attachTo(Graphics.root);
                     new Entity(models["corner"])
                         .attachTo(junct)
                         .rotate(0, -90, 0)
@@ -43,12 +52,9 @@
                     new Entity(models["corner"])
                         .attachTo(junct)
                         .setPosition(-1, 0, 0);
-
-                    Graphics.addRenderTickHandler(function() { //This method will be called on every rendertick
-
-                    });
-                    junct.rotate(0, -45, 0);
                     console.log("Starting...");
+                    Game.init();
+                    Player.init();
                     Graphics.start(); //Kick off!
                 }
             });

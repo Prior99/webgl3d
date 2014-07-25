@@ -119,6 +119,10 @@ var Graphics = {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         mat4.perspective(this.projectionMatrix, 45, this.width / this.height, 0.1, 100.0);
         mat4.identity(this.modelViewMatrix); //Einheitsmatrix
+        mat4.rotateX(this.modelViewMatrix, this.modelViewMatrix, degToRad(Player.rotation.x));
+        mat4.rotateY(this.modelViewMatrix, this.modelViewMatrix, degToRad(Player.rotation.y));
+        mat4.rotateZ(this.modelViewMatrix, this.modelViewMatrix, degToRad(Player.rotation.z));
+        mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [Player.position.x, Player.position.y, Player.position.z]);
 
         this.drawEntity(this.root);
 
