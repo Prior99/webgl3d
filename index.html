@@ -37,7 +37,8 @@
                     "models/junction_quad.js",
                     "models/wall.js",
                     "models/corner.js",
-                    "models/floor.js"
+                    "models/floor.js",
+                    "models/junction_tri.js"
                 ];
                 var canvas = $("canvas");
                 Graphics.init(canvas[0], function () {
@@ -57,14 +58,8 @@
                                 .setPosition(x, 1, y);
                         }
                     }
-                    var junct = new Entity(/*models["wall"]*/)
-                        .attachTo(Graphics.root);
-                    new Entity(models["wall"], "tiles.jpg")
-                        .attachTo(junct)
-                        .rotate(0, -90, 0)
-                        .setPosition(1, 0, 0);
-                    new Entity(models["wall"], "tiles.jpg")
-                        .attachTo(junct)
+                    new Entity(models["junction_tri"], "bricks.jpg")
+                        .attachTo(Graphics.root)
                         .setPosition(-1, 0, 0);
                     console.log("Starting...");
                     Game.init();
