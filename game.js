@@ -15,17 +15,40 @@ var Game = {
         Graphics.init($("canvas")[0], function() {
             console.log("Graphics initialized.");
             Game.loadModels(models, function() {
-                   console.log("Models loaded.");
+                  console.log("Models loaded.");
                 Game.loadMap(map, function() {
                     Game.generateMap();
-					Player.init();
+					Player.init(Game.startPosition.x, Game.startPosition.y);
                     Graphics.start();
                     console.log("Graphics started.");
                     callback();
-                })
+                });
             });
         });
     },
+	
+	validatePosition : function(pos, old) {
+		var posInt = {
+			x : Math.round(pos.x),
+			y : Math.round(pos.z)
+		};
+		var oldInt = {
+			x : Math.round(old.x),
+			y : Math.round(old.z)
+		};
+		if(this.map[posInt.y][posInt.x]) {
+			if(this.map[posInt.y][oldInt.x]) pos.z = old.z;
+			else if(this.map[oldInt.y][posInt.x]) pos.x = old.x;
+			else if(this.map[oldInt.y][oldInt.x]) {
+				pos.x = old.x;
+				pos.z = old.z;
+			}
+			return false;
+		}
+		else {
+			return true;
+		}
+	},
 
     loadModels : function(models, callback) {
         var self = this;
@@ -45,6 +68,7 @@ var Game = {
 			cache : false,
             success : function(data) {
                 var map = eval("(" + data + ")");
+				self.startPosition = map.startPosition;
                 var imgFileName = map.mapFile;
 				var img = new Image();
 				console.log("Loading map \"" + imgFileName + "\"...");
@@ -63,7 +87,6 @@ var Game = {
 						for(var x = 0; x < img.width; x++) {
 							var p = ctx.getImageData(x, y, 1, 1).data;
 							p = p[0] << 16 | p[1] << 8 | p[2];
-							console.log(p.toString(16));
 							if(p == 0x000000) {
 								self.map[y][x] = true;
 							}
