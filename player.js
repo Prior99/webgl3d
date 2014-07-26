@@ -41,7 +41,6 @@ var Player = {
             }
             if(Player.currentKeyboard.w || Player.currentKeyboard.a || Player.currentKeyboard.s || Player.currentKeyboard.d) {
                 Player.position.y = Math.sin(Player.joggingAngle += Player.joggingFactor) * Player.joggingScale;
-                console.log(Player.position);
             }
         });
         $(document).keydown(function(e) {

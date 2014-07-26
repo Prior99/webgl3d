@@ -23,6 +23,17 @@
         <canvas width="500" height="500"/>
         <script>
             $(function() {
+				function lock(e) {
+                    var element = $("canvas")[0];
+                    element.requestPointerLock =
+                        element.requestPointerLock ||
+                        element.mozRequestPointerLock ||
+                        element.webkitRequestPointerLock;
+                    element.requestPointerLock();
+                    $(document).unbind('mousedown', lock);
+                }
+                $(document).mousedown(lock);
+				
                 Game.init($("canvas")[0], "maps/test.js", function() {
                     console.log("Game started.");
                 });
