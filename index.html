@@ -22,15 +22,23 @@
     <body>
         <canvas width="500" height="500"/>
         <script>
+			var element = $("canvas")[0];
+			
+			function isPointerLocked() {
+				return document.pointerLockElement == element || 
+					document.mozPointerLockElement == element || 
+					document.webkitPointerLockElement == element
+			}
+			
             $(function() {
 				function lock(e) {
-                    var element = $("canvas")[0];
-                    element.requestPointerLock =
-                        element.requestPointerLock ||
-                        element.mozRequestPointerLock ||
-                        element.webkitRequestPointerLock;
-                    element.requestPointerLock();
-                    $(document).unbind('mousedown', lock);
+					if(!isPointerLocked()) {
+						element.requestPointerLock =
+							element.requestPointerLock ||
+							element.mozRequestPointerLock ||
+							element.webkitRequestPointerLock;
+						element.requestPointerLock();
+					}
                 }
                 $(document).mousedown(lock);
 				

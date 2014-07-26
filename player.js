@@ -56,6 +56,7 @@ var Player = {
             if(e.which == 68) Player.currentKeyboard.d = false;
         });
         document.addEventListener("mousemove", function(e) {
+			if(!isPointerLocked()) return;
             var x = e.movementX || e.webkitMovementX || e.mozMovementX || 0;
             var y = e.movementY || e.webkitMovementY || e.mozMovementY || 0;
             Player.rotation.x += y*Player.turnSpeedFactor;
