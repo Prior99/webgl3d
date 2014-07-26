@@ -20,52 +20,12 @@
         </style>
     </head>
     <body>
-        <canvas width="500" height="500" id="canvas"/>
+        <canvas width="500" height="500"/>
         <script>
             $(function() {
-                function lock(e) {
-                    var element = document.getElementById("canvas");
-                    element.requestPointerLock =
-                        element.requestPointerLock ||
-                        element.mozRequestPointerLock ||
-                        element.webkitRequestPointerLock;
-                    element.requestPointerLock();
-                    $(document).unbind('mousedown', lock);
-                }
-                $(document).mousedown(lock);
-                var models = [
-                    "models/junction_quad.js",
-                    "models/wall.js",
-                    "models/corner.js",
-                    "models/floor.js",
-                    "models/junction_tri.js"
-                ];
-                var canvas = $("canvas");
-                Graphics.init(canvas[0], function () {
-                    console.log("Graphics initialized!");
-                    Graphics.loadModels(models, start);
+                Game.init($("canvas")[0], "maps/test.js", function() {
+                    console.log("Game started.");
                 });
-
-                function start(models) {
-                    console.log("Models Loaded!");
-                    for(var x = -3; x < 3; x++) {
-                        for(var y = -3; y < 3; y++) {
-                            new Entity(models["floor"], "tiles.jpg")
-                                .attachTo(Graphics.root)
-                                .setPosition(x, -1, y);
-                            new Entity(models["floor"], "wood.jpg")
-                                .attachTo(Graphics.root)
-                                .setPosition(x, 1, y);
-                        }
-                    }
-                    new Entity(models["junction_tri"], "bricks.jpg")
-                        .attachTo(Graphics.root)
-                        .setPosition(-1, 0, 0);
-                    console.log("Starting...");
-                    Game.init();
-                    Player.init();
-                    Graphics.start(); //Kick off!
-                }
             });
         </script>
     </body>
