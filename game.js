@@ -7,6 +7,7 @@ var Game = {
             "models/floor.js",
             "models/junction_tri.js",
             "models/concreteblock.js",
+            "models/sky.js",
         ];
         this.tickHandlers = [];
         setInterval(function() {
@@ -104,13 +105,13 @@ var Game = {
     },
 
     generateMap : function() {
+		new Entity(this.models["sky"], "textures/clouds.jpg")
+			.setPosition(this.dimension.width/2, 100, this.dimension.height/2)
+			.attachTo(Graphics.root);
         for(var y = 0; y < this.dimension.height; y++) {
             for(var x = 0; x < this.dimension.width; x++) {
                 new Entity(this.models["floor"], "textures/tiles.jpg")
                     .setPosition(x, -1, y)
-                    .attachTo(Graphics.root);
-                new Entity(this.models["floor"], "textures/wood.jpg")
-                    .setPosition(x, 1, y)
                     .attachTo(Graphics.root);
 				if(this.map[y][x]) {
 					var entity;
