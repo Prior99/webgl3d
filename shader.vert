@@ -17,6 +17,6 @@ void main(void) {
     vTextureCoord = aTextureCoord;
 
     vec3 transformedNormal = uNormalMatrix * aNormals;
-    float directionalLightWeighting = max(dot(transformedNormal, vec3(-.33, .33, .33)), 0.0);
+    float directionalLightWeighting = max(dot(transformedNormal, uLightDirection), 0.0);
     vLightWeighting = uLightColor * (directionalLightWeighting + vec3(.2, .2, .2));
 }

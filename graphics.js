@@ -14,18 +14,17 @@ var Graphics = {
             Graphics.resize();
         }, false);
         this.lightDirection = {
-            x : .25,
-            y : .25,
-            z : -1
+            x : -.25,
+            y : -1,
+            z : -.25
         };
         this.lightColor = {
-            r : 0.8,
-            g : 0.8,
+            r : 1,
+            g : 1,
             b : 1
         };
         this.lightAdjusted = vec3.create();
-        vec3.normalize([this.lightDirection.x, this.lightDirection.y, this.lightDirection.z], this.lightAdjusted);
-        vec3.scale(this.lightAdjusted, this.lightAdjusted, -1);
+        vec3.normalize(this.lightAdjusted, [this.lightDirection.x, this.lightDirection.y, this.lightDirection.z]);
         this.resize();
     },
 
