@@ -27,8 +27,9 @@ var Game = {
             });
         });
     },
-	
+
 	validatePosition : function(pos, old) {
+        return true;
 		var posInt = {
 			x : Math.round(pos.x),
 			y : Math.round(pos.z)
@@ -105,9 +106,12 @@ var Game = {
     },
 
     generateMap : function() {
-		new Entity(this.models["sky"], "textures/clouds.jpg")
+        /*new Entity(this.models["concrete"], "textures/bricks.jpg")
+                    .attachTo(Graphics.root)
+                    .setPosition(0, 0, 0);*/
+		/*new Entity(this.models["sky"], "textures/clouds.jpg")
 			.setPosition(this.dimension.width/2, 100, this.dimension.height/2)
-			.attachTo(Graphics.root);
+			.attachTo(Graphics.root);*/
         for(var y = 0; y < this.dimension.height; y++) {
             for(var x = 0; x < this.dimension.width; x++) {
                 new Entity(this.models["floor"], "textures/tiles.jpg")
@@ -139,7 +143,7 @@ var Game = {
 					}
 					if(!a && b && !c && d) { //Ecke Unten-Rechts
 						entity = new Entity(this.models["corner"], texture)
-							.rotate(0, -90, 0);
+							.rotate(0, 270, 0);
 					}
 					if(!a && b && c && !d) { //Ecke Unten-Links
 						entity = new Entity(this.models["corner"], texture)
@@ -147,7 +151,7 @@ var Game = {
 					}
 					if(!a && b && c && d) { //Dreierkreuzung Nicht-Oben
 						entity = new Entity(this.models["junction_tri"], texture)
-							.rotate(0, -90, 0);
+							.rotate(0, 270, 0);
 					}
 					if(a && !b && !c && !d) { //Derzeit undefiniert ??? Senkrechte Linie
 						entity = new Entity(this.models["wall"], texture)

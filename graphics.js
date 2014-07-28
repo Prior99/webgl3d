@@ -13,6 +13,19 @@ var Graphics = {
         window.addEventListener('resize', function() { //On resize we have to resize our canvas
             Graphics.resize();
         }, false);
+        this.lightDirection = {
+            x : .25,
+            y : .25,
+            z : -1
+        };
+        this.lightColor = {
+            r : 0.8,
+            g : 0.8,
+            b : 1
+        };
+        this.lightAdjusted = vec3.create();
+        vec3.normalize([this.lightDirection.x, this.lightDirection.y, this.lightDirection.z], this.lightAdjusted);
+        vec3.scale(this.lightAdjusted, this.lightAdjusted, -1);
         this.resize();
     },
 
@@ -72,6 +85,7 @@ var Graphics = {
                 $.ajax({
                     url : url,
                     dataType : "text",
+                    cache : false,
                     success : loadModel
                 });
             }
@@ -82,11 +96,19 @@ var Graphics = {
                 vertices : gl.createBuffer(),
                 textureCoordinates : gl.createBuffer(),
                 indices : gl.createBuffer(),
+                normals : gl.createBuffer(),
                 texture : null,
                 name : model.name,
                 vertexCount : model.vertices.length / 3,
                 indexCount : model.indices.length
             };
+            if(!model.normals) console.error("Model \"" + model.name + "\" is missing normals.");
+            if(!model.vertices) console.error("Model \"" + model.name + "\" is missing vertices.");
+            if(!model.name) console.error("Model \"" + model.name + "\" is missing name.");
+            if(!model.textureCoordinates) console.error("Model \"" + model.name + "\" is missing textureCoordinates.");
+            if(!model.indices) console.error("Model \"" + model.name + "\" is missing indices.");
+            if(model.normals.length != model.vertices.length)
+                console.error("Model \"" + model.name + "\" has invalid normals count. " + model.normals.length + " != " + model.vertices.length);
             /*
              * Load vertices to GPU
              */
@@ -97,6 +119,11 @@ var Graphics = {
              */
             gl.bindBuffer(gl.ARRAY_BUFFER, m.textureCoordinates);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textureCoordinates), gl.STATIC_DRAW);
+            /*
+             * Load normals
+             */
+            gl.bindBuffer(gl.ARRAY_BUFFER, m.normals);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.normals), gl.STATIC_DRAW);
             /*
              * Load indices to GPU
              */
@@ -136,14 +163,35 @@ var Graphics = {
         mat4.rotateY(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.y));
         mat4.rotateZ(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.z));
         if(entity.model) {
+            /*
+             * Map vertices to shader
+             */
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.vertices);
             this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
-
+            /*
+             * Map texturecoordinates to shader
+             */
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.textureCoordinates);
             this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
+            /*
+             * Normals
+             */
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.normals);
+            this.gl.vertexAttribPointer(this.shaderProgram.normalsAttribute, 3, this.gl.FLOAT, false, 0, 0);
 
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, entity.texture);
+            this.gl.uniform3fv(this.shaderProgram.lightDirectionUniform, this.lightAdjusted);
+            this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
+            var normalMatrix = mat3.create();
+            var helper = mat4.create();
+            mat4.identity(helper);
+            mat4.translate(helper, helper, [entity.position.x, entity.position.y, entity.position.z]);
+            mat4.rotateX(helper, helper, degToRad(entity.rotation.x));
+            mat4.rotateY(helper, helper, degToRad(entity.rotation.y));
+            mat4.rotateZ(helper, helper, degToRad(entity.rotation.z));
+            mat3.normalFromMat4(normalMatrix, helper);
+            this.gl.uniformMatrix3fv(this.shaderProgram.normalMatrixUniform, false, normalMatrix);
             this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
 
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indices);
@@ -221,6 +269,12 @@ var Graphics = {
             Graphics.shaderProgram.textureCoordAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aTextureCoord");
             gl.enableVertexAttribArray(Graphics.shaderProgram.textureCoordAttribute);
 
+            Graphics.shaderProgram.normalsAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aNormals");
+            gl.enableVertexAttribArray(Graphics.shaderProgram.normalsAttribute);
+
+            Graphics.shaderProgram.lightColorUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightColor");
+            Graphics.shaderProgram.lightDirectionUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightDirection");
+            Graphics.shaderProgram.normalMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uNormalMatrix");
             Graphics.shaderProgram.projectionMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uProjectionMatrix");
             Graphics.shaderProgram.modelViewMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uModelViewMatrix");
             Graphics.shaderProgram.samplerUniform = gl.getUniformLocation(Graphics.shaderProgram, "uSampler");
