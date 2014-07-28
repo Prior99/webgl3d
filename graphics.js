@@ -185,6 +185,7 @@ var Graphics = {
             var normalMatrix = mat3.create();
             var helper = mat4.create();
             mat4.identity(helper);
+            mat4.translate(helper, helper, [entity.position.x, entity.position.y, entity.position.z]);
             mat4.rotateX(helper, helper, degToRad(entity.rotation.x));
             mat4.rotateY(helper, helper, degToRad(entity.rotation.y));
             mat4.rotateZ(helper, helper, degToRad(entity.rotation.z));
