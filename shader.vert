@@ -1,3 +1,5 @@
+precision lowp float;
+
 attribute vec3 aVertexPosition;
 attribute vec2 aTextureCoord;
 attribute vec3 aNormals;

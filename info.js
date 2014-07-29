@@ -6,9 +6,7 @@ var Info = {
         this.lastTime = Date.now();
         this.fps = 0;
         setInterval(function() {
-            window.requestAnimationFrame(function() {
-                Info.redraw();
-            });
+            Info.redraw();
         }, 100)
         this.arr = [];
         this.index = 0;

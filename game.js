@@ -29,7 +29,6 @@ var Game = {
     },
 
 	validatePosition : function(pos, old) {
-        return true;
 		var posInt = {
 			x : Math.round(pos.x),
 			y : Math.round(pos.z)
@@ -105,18 +104,82 @@ var Game = {
         });
     },
 
+    generateFloor : function(width, height) {
+        return {
+            name : "floor",
+            vertices : [
+                -.5, -1, -.5,
+                 .5 + width, -1, -.5,
+                -.5, -1,  .5 + height,
+                 .5 + width, -1,  .5 + height,
+            ],
+            normals : [
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0
+            ],
+            textureCoordinates : [
+                0, 0,
+                width, 0,
+                0, height,
+                width, height
+            ],
+            indices : [
+                0, 1, 2,
+                1, 2, 3
+            ]
+        };
+    },
+
+    generateCeiling : function(width, height) {
+        return {
+            name : "ceiling",
+            vertices : [
+                -.5, 1, -.5,
+                 .5 + width, 1, -.5,
+                -.5, 1,  .5 + height,
+                 .5 + width, 1,  .5 + height,
+            ],
+            normals : [
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0
+            ],
+            textureCoordinates : [
+                0, 0,
+                width, 0,
+                0, height,
+                width, height
+            ],
+            indices : [
+                0, 1, 2,
+                1, 2, 3
+            ]
+        };
+    },
+
     generateMap : function() {
+        var floor = Graphics.loadModel(this.generateFloor(this.dimension.width, this.dimension.height));
+        var ceiling = Graphics.loadModel(this.generateCeiling(this.dimension.width, this.dimension.height));
         /*new Entity(this.models["concrete"], "textures/bricks.jpg")
                     .attachTo(Graphics.root)
                     .setPosition(0, 0, 0);*/
 		/*new Entity(this.models["sky"], "textures/clouds.jpg")
 			.setPosition(this.dimension.width/2, 100, this.dimension.height/2)
 			.attachTo(Graphics.root);*/
+        new Entity(floor, "textures/tiles.jpg").attachTo(Graphics.root);
+        new Entity(ceiling, "textures/wood.jpg").attachTo(Graphics.root);
         for(var y = 0; y < this.dimension.height; y++) {
             for(var x = 0; x < this.dimension.width; x++) {
-                new Entity(this.models["floor"], "textures/tiles.jpg")
+                /*new Entity(this.models["floor"], "textures/tiles.jpg")
                     .setPosition(x, -1, y)
                     .attachTo(Graphics.root);
+                new Entity(this.models["floor"], "textures/wood.jpg")
+                    .setPosition(x, 1, y)
+                    .rotate(180, 0, 0)
+                    .attachTo(Graphics.root);*/
 				if(this.map[y][x]) {
 					var entity;
 					var texture = "textures/bricks.jpg";

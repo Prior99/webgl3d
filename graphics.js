@@ -19,22 +19,18 @@ var Graphics = {
             y : 1,
             z : 10
         };*/
-        this.lightPosition = {
-            x : 10,
-            y : 1,
-            z : 10
-        };
-        this.lightStrength = 3;
-        //this.lightPosition = Player.position;
+
+        this.lightStrength = 5;
+        this.lightPosition = Player.position;
         this.lightColor = {
             r : .7,
             g : .7,
             b : .5
         };
         this.ambientColor = {
-            r : 0,
-            g : 0,
-            b : 0
+            r : .1,
+            g : .1,
+            b : .2
         };
         this.resize();
     },
@@ -102,47 +98,52 @@ var Graphics = {
         }
         function loadModel(data) {
             var model = eval("(" + data + ")");
-            var m = {
-                vertices : gl.createBuffer(),
-                textureCoordinates : gl.createBuffer(),
-                indices : gl.createBuffer(),
-                normals : gl.createBuffer(),
-                texture : null,
-                name : model.name,
-                vertexCount : model.vertices.length / 3,
-                indexCount : model.indices.length
-            };
-            if(!model.normals) console.error("Model \"" + model.name + "\" is missing normals.");
-            if(!model.vertices) console.error("Model \"" + model.name + "\" is missing vertices.");
-            if(!model.name) console.error("Model \"" + model.name + "\" is missing name.");
-            if(!model.textureCoordinates) console.error("Model \"" + model.name + "\" is missing textureCoordinates.");
-            if(!model.indices) console.error("Model \"" + model.name + "\" is missing indices.");
-            if(model.normals.length != model.vertices.length)
-                console.error("Model \"" + model.name + "\" has invalid normals count. " + model.normals.length + " != " + model.vertices.length);
-            /*
-             * Load vertices to GPU
-             */
-            gl.bindBuffer(gl.ARRAY_BUFFER, m.vertices);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
-            /*
-             * Load texturecoordinates to GPU
-             */
-            gl.bindBuffer(gl.ARRAY_BUFFER, m.textureCoordinates);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textureCoordinates), gl.STATIC_DRAW);
-            /*
-             * Load normals
-             */
-            gl.bindBuffer(gl.ARRAY_BUFFER, m.normals);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.normals), gl.STATIC_DRAW);
-            /*
-             * Load indices to GPU
-             */
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.indices);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
-            result[model.name] = m;
+            result[model.name] = Graphics.loadModel(model);
             recurse();
         }
         recurse();
+    },
+
+    loadModel : function(model, callback) {
+        var gl = Graphics.gl;
+        var m = {
+            vertices : gl.createBuffer(),
+            textureCoordinates : gl.createBuffer(),
+            indices : gl.createBuffer(),
+            normals : gl.createBuffer(),
+            texture : null,
+            name : model.name,
+            vertexCount : model.vertices.length / 3,
+            indexCount : model.indices.length
+        };
+        if(!model.normals) console.error("Model \"" + model.name + "\" is missing normals.");
+        if(!model.vertices) console.error("Model \"" + model.name + "\" is missing vertices.");
+        if(!model.name) console.error("Model \"" + model.name + "\" is missing name.");
+        if(!model.textureCoordinates) console.error("Model \"" + model.name + "\" is missing textureCoordinates.");
+        if(!model.indices) console.error("Model \"" + model.name + "\" is missing indices.");
+        if(model.normals.length != model.vertices.length)
+            console.error("Model \"" + model.name + "\" has invalid normals count. " + model.normals.length + " != " + model.vertices.length);
+        /*
+         * Load vertices to GPU
+         */
+        gl.bindBuffer(gl.ARRAY_BUFFER, m.vertices);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
+        /*
+         * Load texturecoordinates to GPU
+         */
+        gl.bindBuffer(gl.ARRAY_BUFFER, m.textureCoordinates);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textureCoordinates), gl.STATIC_DRAW);
+        /*
+         * Load normals
+         */
+        gl.bindBuffer(gl.ARRAY_BUFFER, m.normals);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.normals), gl.STATIC_DRAW);
+        /*
+         * Load indices to GPU
+         */
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.indices);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
+        return m;
     },
 
     redraw : function() {
