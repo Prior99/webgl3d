@@ -164,7 +164,7 @@ var Graphics = {
         this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
         this.gl.uniform3f(this.shaderProgram.ambientColorUniform, this.ambientColor.r, this.ambientColor.g, this.ambientColor.b);
         this.drawEntity(this.root);
-
+        Info.reportDraw();
         window.requestAnimationFrame(function() {
             Graphics.redraw();
         });
