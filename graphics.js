@@ -2,8 +2,9 @@ var Graphics = {
     init : function(canvas, callback) {
         this.canvas = canvas;
         this.initGL();
-        this.modelViewMatrix = mat4.create();
-        this.modelViewStack = [];
+        this.modelMatrix = mat4.create();
+        this.viewMatrix = mat4.create();
+        this.modelMatrixStack = [];
         this.projectionMatrix = mat4.create();
         this.initShaders(callback);
         this.entities = [];
@@ -13,18 +14,23 @@ var Graphics = {
         window.addEventListener('resize', function() { //On resize we have to resize our canvas
             Graphics.resize();
         }, false);
-        this.lightDirection = {
-            x : -.25,
-            y : -1,
-            z : -.25
+        this.lightPosition = {
+            x : -2,
+            y : -5,
+            z : -2
         };
         this.lightColor = {
-            r : 1,
-            g : 1,
-            b : 1
+            r : .7,
+            g : .7,
+            b : .5
+        };
+        this.ambientColor = {
+            r : .5,
+            g : .5,
+            b : .7
         };
         this.lightAdjusted = vec3.create();
-        vec3.normalize(this.lightAdjusted, [this.lightDirection.x, this.lightDirection.y, this.lightDirection.z]);
+        vec3.normalize(this.lightAdjusted, [this.lightPosition.x, this.lightPosition.y, this.lightPosition.z]);
         this.resize();
     },
 
@@ -140,12 +146,17 @@ var Graphics = {
         }
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
         mat4.perspective(this.projectionMatrix, 45, this.width / this.height, 0.1, 1000.0);
-        mat4.identity(this.modelViewMatrix); //Einheitsmatrix
-        mat4.rotateX(this.modelViewMatrix, this.modelViewMatrix, degToRad(Player.rotation.x));
-        mat4.rotateY(this.modelViewMatrix, this.modelViewMatrix, degToRad(Player.rotation.y));
-        mat4.rotateZ(this.modelViewMatrix, this.modelViewMatrix, degToRad(Player.rotation.z));
-        mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [-Player.position.x, -Player.position.y, -Player.position.z]);
+        mat4.identity(this.modelMatrix); //Einheitsmatrix
+        mat4.identity(this.viewMatrix); //Einheitsmatrix
+        mat4.rotateX(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.x));
+        mat4.rotateY(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.y));
+        mat4.rotateZ(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.z));
+        mat4.translate(this.viewMatrix, this.viewMatrix, [-Player.position.x, -Player.position.y, -Player.position.z]);
 
+
+        this.gl.uniform3fv(this.shaderProgram.lightPositionUniform, this.lightAdjusted);
+        this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
+        this.gl.uniform3f(this.shaderProgram.ambientColorUniform, this.ambientColor.r, this.ambientColor.g, this.ambientColor.b);
         this.drawEntity(this.root);
 
         window.requestAnimationFrame(function() {
@@ -156,11 +167,10 @@ var Graphics = {
     drawEntity : function(entity) {
         if(entity.tick) entity.tick();
         this.push();
-        mat4.translate(this.modelViewMatrix, this.modelViewMatrix, [entity.position.x, entity.position.y, entity.position.z]);
-        this.push();
-        mat4.rotateX(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.x));
-        mat4.rotateY(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.y));
-        mat4.rotateZ(this.modelViewMatrix, this.modelViewMatrix, degToRad(entity.rotation.z));
+        mat4.translate(this.modelMatrix, this.modelMatrix, [entity.position.x, entity.position.y, entity.position.z]);
+        mat4.rotateX(this.modelMatrix, this.modelMatrix, degToRad(entity.rotation.x));
+        mat4.rotateY(this.modelMatrix, this.modelMatrix, degToRad(entity.rotation.y));
+        mat4.rotateZ(this.modelMatrix, this.modelMatrix, degToRad(entity.rotation.z));
         if(entity.model) {
             /*
              * Map vertices to shader
@@ -180,17 +190,6 @@ var Graphics = {
 
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, entity.texture);
-            this.gl.uniform3fv(this.shaderProgram.lightDirectionUniform, this.lightAdjusted);
-            this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
-            var normalMatrix = mat3.create();
-            var helper = mat4.create();
-            mat4.identity(helper);
-            mat4.translate(helper, helper, [entity.position.x, entity.position.y, entity.position.z]);
-            mat4.rotateX(helper, helper, degToRad(entity.rotation.x));
-            mat4.rotateY(helper, helper, degToRad(entity.rotation.y));
-            mat4.rotateZ(helper, helper, degToRad(entity.rotation.z));
-            mat3.normalFromMat4(normalMatrix, helper);
-            this.gl.uniformMatrix3fv(this.shaderProgram.normalMatrixUniform, false, normalMatrix);
             this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
 
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indices);
@@ -201,7 +200,6 @@ var Graphics = {
         for(var i in entity.children) {
             Graphics.drawEntity(entity.children[i]);
         }
-        this.pop();
         this.pop();
     },
 
@@ -229,17 +227,17 @@ var Graphics = {
     },
 
     pop : function() {
-        if(this.modelViewStack.length == 0) {
+        if(this.modelMatrixStack.length == 0) {
             throw "Could not pop on empty stack!";
         }
         else {
-            this.modelViewMatrix = this.modelViewStack.pop();
+            this.modelMatrix = this.modelMatrixStack.pop();
         }
     },
 
     push : function() {
-        var tmp = mat4.clone(this.modelViewMatrix);
-        this.modelViewStack.push(tmp);
+        var tmp = mat4.clone(this.modelMatrix);
+        this.modelMatrixStack.push(tmp);
     },
 
     initShaders : function(callback) {
@@ -271,11 +269,13 @@ var Graphics = {
             Graphics.shaderProgram.normalsAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aNormals");
             gl.enableVertexAttribArray(Graphics.shaderProgram.normalsAttribute);
 
+            Graphics.shaderProgram.ambientColorUniform = gl.getUniformLocation(Graphics.shaderProgram, "uAmbientColor");
             Graphics.shaderProgram.lightColorUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightColor");
-            Graphics.shaderProgram.lightDirectionUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightDirection");
+            Graphics.shaderProgram.lightPositionUniform = gl.getUniformLocation(Graphics.shaderProgram, "ulightPosition");
             Graphics.shaderProgram.normalMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uNormalMatrix");
             Graphics.shaderProgram.projectionMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uProjectionMatrix");
-            Graphics.shaderProgram.modelViewMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uModelViewMatrix");
+            Graphics.shaderProgram.modelMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uModelMatrix");
+            Graphics.shaderProgram.viewMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uViewMatrix");
             Graphics.shaderProgram.samplerUniform = gl.getUniformLocation(Graphics.shaderProgram, "uSampler");
             callback();
         });
@@ -283,7 +283,13 @@ var Graphics = {
 
     setMatrixUniforms : function() {
         this.gl.uniformMatrix4fv(this.shaderProgram.projectionMatrixUniform, false, this.projectionMatrix);
-        this.gl.uniformMatrix4fv(this.shaderProgram.modelViewMatrixUniform, false, this.modelViewMatrix);
+        this.gl.uniformMatrix4fv(this.shaderProgram.modelMatrixUniform, false, this.modelMatrix);
+        this.gl.uniformMatrix4fv(this.shaderProgram.viewMatrixUniform, false, this.viewMatrix);
+
+        var normalMatrix = mat3.create();
+        mat3.normalFromMat4(normalMatrix, this.modelMatrix);
+        this.gl.uniformMatrix3fv(this.shaderProgram.normalMatrixUniform, false, normalMatrix);
+
     },
 
     loadShaders : function(shaders, callback) {
