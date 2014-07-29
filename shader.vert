@@ -24,5 +24,5 @@ void main(void) {
 
     vec3 transformedNormal = uNormalMatrix * -aNormals;
     float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);
-    vLightWeighting =  uAmbientColor.rgb + uLightColor * (directionalLightWeighting + vec3(.2, .2, .2));
+    vLightWeighting =  uAmbientColor.rgb + uLightColor * directionalLightWeighting ;
 }
