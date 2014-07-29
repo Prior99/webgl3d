@@ -14,20 +14,27 @@ var Graphics = {
         window.addEventListener('resize', function() { //On resize we have to resize our canvas
             Graphics.resize();
         }, false);
+        /*this.lightPosition = {
+            x : 10,
+            y : 1,
+            z : 10
+        };*/
         this.lightPosition = {
             x : 10,
             y : 1,
             z : 10
         };
+        this.lightStrength = 3;
+        //this.lightPosition = Player.position;
         this.lightColor = {
             r : .7,
             g : .7,
             b : .5
         };
         this.ambientColor = {
-            r : .5,
-            g : .5,
-            b : .7
+            r : 0,
+            g : 0,
+            b : 0
         };
         this.resize();
     },
@@ -152,6 +159,7 @@ var Graphics = {
         mat4.translate(this.viewMatrix, this.viewMatrix, [-Player.position.x, -Player.position.y, -Player.position.z]);
 
 
+        this.gl.uniform1f(this.shaderProgram.lightStrengthUniform, this.lightStrength);
         this.gl.uniform3f(this.shaderProgram.lightPositionUniform, this.lightPosition.x, this.lightPosition.y, this.lightPosition.z);
         this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
         this.gl.uniform3f(this.shaderProgram.ambientColorUniform, this.ambientColor.r, this.ambientColor.g, this.ambientColor.b);
@@ -270,6 +278,7 @@ var Graphics = {
             Graphics.shaderProgram.ambientColorUniform = gl.getUniformLocation(Graphics.shaderProgram, "uAmbientColor");
             Graphics.shaderProgram.lightColorUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightColor");
             Graphics.shaderProgram.lightPositionUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightPosition");
+            Graphics.shaderProgram.lightStrengthUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightStrength");
             Graphics.shaderProgram.normalMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uNormalMatrix");
             Graphics.shaderProgram.projectionMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uProjectionMatrix");
             Graphics.shaderProgram.modelMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uModelMatrix");
