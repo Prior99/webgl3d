@@ -185,9 +185,6 @@ var Game = {
 					entity
 						.attachTo(Graphics.root)
 						.setPosition(x, 0, y);
-					/*new Entity(this.models["wall"], "textures/bricks.jpg")
-						.setPosition(x, 0, y)
-						.attachTo(Graphics.root);*/
 				}
             }
         }
