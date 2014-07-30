@@ -67,6 +67,8 @@ var Graphics = {
     start : function() {
         this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
         this.gl.enable(Graphics.gl.DEPTH_TEST); //So things behind other things are hidden
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.viewport(0, 0, this.width, this.height);
         this.redraw();
     },
@@ -186,21 +188,32 @@ var Graphics = {
         mat4.rotateY(this.modelMatrix, this.modelMatrix, degToRad(entity.rotation.y));
         mat4.rotateZ(this.modelMatrix, this.modelMatrix, degToRad(entity.rotation.z));
         if(entity.model) {
+            var shaderToBind;
+            if(entity.shader) {
+                this.gl.useProgram(entity.shader);
+                shaderToBind = entity.shader;
+                entity.shader.prepare(entity.shader);
+            }
+            else {
+                shaderToBind = this.shaderProgram;
+                this.setMatrixUniforms();
+            }
+
             /*
              * Map vertices to shader
              */
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.vertices);
-            this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(shaderToBind.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
             /*
              * Map texturecoordinates to shader
              */
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.textureCoordinates);
-            this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(shaderToBind.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
             /*
              * Normals
              */
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.normals);
-            this.gl.vertexAttribPointer(this.shaderProgram.normalsAttribute, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(shaderToBind.normalsAttribute, 3, this.gl.FLOAT, false, 0, 0);
 
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, entity.texture);

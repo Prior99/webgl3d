@@ -28,10 +28,22 @@ var Entity = function(model, texture, shaders) {
             if(!Graphics.gl.getProgramParameter(self.shader, Graphics.gl.LINK_STATUS)) {
                 console.error("Unable to link shaders together.");
             }
+            Graphics.gl.useProgram(self.shader);
+
+            self.shader.vertexPositionAttribute = Graphics.gl.getAttribLocation(self.shader, "aVertexPosition");
+            Graphics.gl.enableVertexAttribArray(self.shader.vertexPositionAttribute);
+
+            self.shader.textureCoordAttribute = Graphics.gl.getAttribLocation(self.shader, "aTextureCoord");
+            Graphics.gl.enableVertexAttribArray(self.shader.textureCoordAttribute);
+
+            self.shader.normalsAttribute = Graphics.gl.getAttribLocation(self.shader, "aNormals");
+            Graphics.gl.enableVertexAttribArray(self.shader.normalsAttribute);
+
             for(var key in shaders.mappings) {
-                self.shader[key] = Graphics.gl.getUniformLocation(Graphics.shaderProgram, shaders.mappings[key]);
+                self.shader[key] = Graphics.gl.getUniformLocation(self.shader, shaders.mappings[key]);
             }
             self.shader.prepare = shaders.prepare;
+            Graphics.gl.useProgram(Graphics.shaderProgram);
         });
     }
 }

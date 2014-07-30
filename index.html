@@ -75,9 +75,9 @@
                             samplerUniform : "uSampler"
                         },
                         prepare : function(shader) {
-                            Graphics.gl.uniformMatrix4fv(shader.viewMatrixUniform, false, Game.viewMatrix);
-                            Graphics.gl.uniformMatrix4fv(shader.modelMatrixUniform, false, Game.modelMatrix);
-                            Graphics.gl.uniformMatrix4fv(shader.projectionMatrixUniform, false, Game.projectionMatrix);
+                            Graphics.gl.uniformMatrix4fv(shader.viewMatrixUniform, false, Graphics.viewMatrix);
+                            Graphics.gl.uniformMatrix4fv(shader.modelMatrixUniform, false, Graphics.modelMatrix);
+                            Graphics.gl.uniformMatrix4fv(shader.projectionMatrixUniform, false, Graphics.projectionMatrix);
                             Graphics.gl.uniform1i(shader.samplerUniform, 0);
                         }
                     })
