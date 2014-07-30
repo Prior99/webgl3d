@@ -63,8 +63,26 @@
                 }
                 $(document).mousedown(lock);
 
-                Game.init($("#webgl")[0], "maps/test.js", function() {
+                Game.init($("#webgl")[0], "maps/test.js", function(models) {
                     console.log("Game started.");
+                    new Entity(models["floor"], "textures/pentagram.png", {
+                        vertex : "pentagram.vert",
+                        fragment : "pentagram.frag",
+                        mappings : {
+                            modelMatrixUniform : "uModelMatrix",
+                            viewMatrixUniform : "uViewMatrix",
+                            projectionMatrixUniform : "uProjectionMatrix",
+                            samplerUniform : "uSampler"
+                        },
+                        prepare : function(shader) {
+                            Graphics.gl.uniformMatrix4fv(shader.viewMatrixUniform, false, Game.viewMatrix);
+                            Graphics.gl.uniformMatrix4fv(shader.modelMatrixUniform, false, Game.modelMatrix);
+                            Graphics.gl.uniformMatrix4fv(shader.projectionMatrixUniform, false, Game.projectionMatrix);
+                            Graphics.gl.uniform1i(shader.samplerUniform, 0);
+                        }
+                    })
+                        .setPosition(2, -0.99999, 1)
+                        .attachTo(Graphics.root);
                 });
 
                 Info.init($("#info")[0]);

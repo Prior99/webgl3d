@@ -22,7 +22,7 @@ var Game = {
 					Player.init(Game.startPosition.x, Game.startPosition.y);
                     Graphics.start();
                     console.log("Graphics started.");
-                    callback();
+                    callback(Game.models);
                 });
             });
         });

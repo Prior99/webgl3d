@@ -170,6 +170,7 @@ var Graphics = {
         this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
         this.gl.uniform3f(this.shaderProgram.ambientColorUniform, this.ambientColor.r, this.ambientColor.g, this.ambientColor.b);
         this.gl.uniform3f(this.shaderProgram.lightDirectionUniform, rotation[0], rotation[1], rotation[2]);
+        this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
         this.drawEntity(this.root);
         Info.reportDraw();
         window.requestAnimationFrame(function() {
@@ -203,12 +204,19 @@ var Graphics = {
 
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, entity.texture);
-            this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
 
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indices);
+            if(entity.shader) {
+                this.gl.useProgram(entity.shader);
+            }
+            else {
+                this.setMatrixUniforms();
+            }
 
-            this.setMatrixUniforms();
             this.gl.drawElements(this.gl.TRIANGLES, entity.model.indexCount, this.gl.UNSIGNED_SHORT, 0);
+            if(entity.shader) {
+                this.gl.useProgram(Graphics.shaderProgram);
+            }
         }
         for(var i in entity.children) {
             Graphics.drawEntity(entity.children[i]);

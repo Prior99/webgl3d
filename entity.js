@@ -1,4 +1,4 @@
-var Entity = function(model, texture) {
+var Entity = function(model, texture, shaders) {
     this.model = model;
     var self = this;
     if(texture) {
@@ -18,6 +18,22 @@ var Entity = function(model, texture) {
     }
     this.children = [];
     this.parent = null;
+    if(shaders !== undefined) {
+        var self = this;
+        Graphics.loadShaders(shaders, function(vertex, fragment) {
+            self.shader = Graphics.gl.createProgram();
+            Graphics.gl.attachShader(self.shader, vertex);
+            Graphics.gl.attachShader(self.shader, fragment);
+            Graphics.gl.linkProgram(self.shader);
+            if(!Graphics.gl.getProgramParameter(self.shader, Graphics.gl.LINK_STATUS)) {
+                console.error("Unable to link shaders together.");
+            }
+            for(var key in shaders.mappings) {
+                self.shader[key] = Graphics.gl.getUniformLocation(Graphics.shaderProgram, shaders.mappings[key]);
+            }
+            self.shader.prepare = shaders.prepare;
+        });
+    }
 }
 
 Entity.prototype = {
@@ -72,5 +88,11 @@ Entity.prototype = {
         }
         entity.parent = null;
         return this;
+    },
+
+    preRender : function() {
+        if(this.shader) {
+            this.shader.prepare(this.shader);
+        }
     }
 }
