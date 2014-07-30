@@ -35,7 +35,7 @@ void main(void) {
         //lightInfluence = min(.0, lightInfluence);
         lightDistancePerColor = vec3(lightDistance, lightDistance, lightDistance);
         lightDistancePerColor /= uLightStrength/6.;
-        gl_FragColor = vec4(((fragmentColor.rgb * uLightColor) / (lightInfluence * lightDistancePerColor)), fragmentColor.a);
+        gl_FragColor = vec4(((fragmentColor.rgb * uLightColor) / (lightInfluence * lightDistancePerColor))*uLightStrength/10., fragmentColor.a);
     }
     else gl_FragColor = vec4(uAmbientColor + fragmentColor.rgb, fragmentColor.a);
 
