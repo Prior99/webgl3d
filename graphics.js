@@ -157,13 +157,15 @@ var Graphics = {
         mat4.rotateX(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.x));
         mat4.rotateY(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.y));
         mat4.rotateZ(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.z));
+        rotation = vec3.create();
+        vec3.transformMat4(rotation, rotation, mat4);
+        vec3.normalize(rotation, rotation);
         mat4.translate(this.viewMatrix, this.viewMatrix, [-Player.position.x, -Player.position.y, -Player.position.z]);
-
-
         this.gl.uniform1f(this.shaderProgram.lightStrengthUniform, this.lightStrength);
         this.gl.uniform3f(this.shaderProgram.lightPositionUniform, this.lightPosition.x, this.lightPosition.y, this.lightPosition.z);
         this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
         this.gl.uniform3f(this.shaderProgram.ambientColorUniform, this.ambientColor.r, this.ambientColor.g, this.ambientColor.b);
+        this.gl.uniform3f(this.shaderProgram.lightDirectionUniform, rotation[0], rotation[1], rotation[2]);
         this.drawEntity(this.root);
         Info.reportDraw();
         window.requestAnimationFrame(function() {
@@ -276,6 +278,7 @@ var Graphics = {
             Graphics.shaderProgram.normalsAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aNormals");
             gl.enableVertexAttribArray(Graphics.shaderProgram.normalsAttribute);
 
+            Graphics.shaderProgram.lightDirectionUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightDirection");
             Graphics.shaderProgram.ambientColorUniform = gl.getUniformLocation(Graphics.shaderProgram, "uAmbientColor");
             Graphics.shaderProgram.lightColorUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightColor");
             Graphics.shaderProgram.lightPositionUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightPosition");
