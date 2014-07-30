@@ -14,21 +14,24 @@ varying vec4 vPosition;
 
 void main(void) {
     vec4 fragmentColor;
-    vec3 lightWeighting, lightDirection, lightDistance;
-    float directionalLightWeighting, distanceToMiddle, coneFactor;
+    vec3 lightWeighting, lightDirection, normalizedTransformedNormal;
+    float directionalLightWeighting, distanceToMiddle, coneFactor, nDotL, lightInfluence, lightDistance;
 
-    lightDistance = uLightPosition - vPosition.xyz;
+    normalizedTransformedNormal = normalize(vTransformedNormal);
 
-    distanceToMiddle = max(length(cross(vPosition.xyz - uLightPosition, uLightDirection)), 0.1); //Man kann sich /length(uLightDirection) sparen, da normiert
+    lightDirection = uLightPosition - vPosition.xyz;
+    lightDistance = length(lightDirection);
+    lightDirection = normalize(lightDirection);
 
-    lightDirection = normalize(lightDistance);
-    directionalLightWeighting = min(max(dot(normalize(vTransformedNormal), lightDirection), 0.0)*uLightStrength/length(lightDistance), 1.2);
-    lightWeighting = uAmbientColor + uLightColor * directionalLightWeighting;
+    nDotL = max(dot(lightDirection, normalizedTransformedNormal), 0.);
 
     fragmentColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
 
-    coneFactor = max(8.*distanceToMiddle/length(lightDistance), .5);
-
-    gl_FragColor = vec4((fragmentColor.rgb * lightWeighting.xyz)/coneFactor, fragmentColor.a);
+    if(nDotL > 0.) {
+        distanceToMiddle = length(cross(vPosition.xyz - uLightPosition, uLightDirection)); //Man kann sich /length(uLightDirection) sparen, da normiert
+        lightInfluence = distanceToMiddle*uLightStrength + lightDistance/uLightStrength;
+        gl_FragColor = vec4((fragmentColor.rgb / lightInfluence) * uLightColor, fragmentColor.a);
+    }
+    else gl_FragColor = vec4(uAmbientColor + fragmentColor.rgb, fragmentColor.a);
 
 }

@@ -23,9 +23,9 @@ var Graphics = {
         this.lightStrength = 5;
         this.lightPosition = Player.position;
         this.lightColor = {
-            r : .5,
-            g : .5,
-            b : .3
+            r : 1.,
+            g : 1.,
+            b : .7
         };
         this.ambientColor = {
             r : 0,
@@ -163,7 +163,7 @@ var Graphics = {
         var rotation = vec3.fromValues(0, 0, 1);
         vec3.transformMat4(rotation, rotation, tmp);
         vec3.normalize(rotation, rotation);
-        if(Math.random() > 0.6) this.lightStrengthFlicker = this.lightStrength  + Math.random();
+        //if(Math.random() > 0.6) this.lightStrengthFlicker = this.lightStrength  + Math.random();
         mat4.translate(this.viewMatrix, this.viewMatrix, [-Player.position.x, -Player.position.y, -Player.position.z]);
         this.gl.uniform1f(this.shaderProgram.lightStrengthUniform, this.lightStrengthFlicker);
         this.gl.uniform3f(this.shaderProgram.lightPositionUniform, this.lightPosition.x, this.lightPosition.y, this.lightPosition.z);
