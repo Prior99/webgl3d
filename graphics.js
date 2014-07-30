@@ -23,15 +23,16 @@ var Graphics = {
         this.lightStrength = 5;
         this.lightPosition = Player.position;
         this.lightColor = {
-            r : .7,
-            g : .7,
-            b : .5
+            r : .5,
+            g : .5,
+            b : .3
         };
         this.ambientColor = {
-            r : .1,
-            g : .1,
-            b : .2
+            r : 0,
+            g : 0,
+            b : 0
         };
+        this.lightStrengthFlicker = this.lightStrength;
         this.resize();
     },
 
@@ -157,11 +158,14 @@ var Graphics = {
         mat4.rotateX(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.x));
         mat4.rotateY(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.y));
         mat4.rotateZ(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.z));
-        rotation = vec3.create();
-        vec3.transformMat4(rotation, rotation, mat4);
+        var tmp = mat4.create();
+        mat4.transpose(tmp, this.viewMatrix);
+        var rotation = vec3.fromValues(0, 0, 1);
+        vec3.transformMat4(rotation, rotation, tmp);
         vec3.normalize(rotation, rotation);
+        if(Math.random() > 0.6) this.lightStrengthFlicker = this.lightStrength  + Math.random();
         mat4.translate(this.viewMatrix, this.viewMatrix, [-Player.position.x, -Player.position.y, -Player.position.z]);
-        this.gl.uniform1f(this.shaderProgram.lightStrengthUniform, this.lightStrength);
+        this.gl.uniform1f(this.shaderProgram.lightStrengthUniform, this.lightStrengthFlicker);
         this.gl.uniform3f(this.shaderProgram.lightPositionUniform, this.lightPosition.x, this.lightPosition.y, this.lightPosition.z);
         this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
         this.gl.uniform3f(this.shaderProgram.ambientColorUniform, this.ambientColor.r, this.ambientColor.g, this.ambientColor.b);
