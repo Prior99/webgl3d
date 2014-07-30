@@ -1,4 +1,4 @@
-precision mediump float;
+precision lowp float;
 
 uniform sampler2D uSampler;
 
@@ -14,7 +14,7 @@ varying vec4 vPosition;
 
 void main(void) {
     vec4 fragmentColor;
-    vec3 lightWeighting, lightDirection, normalizedTransformedNormal;
+    vec3 lightWeighting, lightDirection, normalizedTransformedNormal, lightDistancePerColor;
     float directionalLightWeighting, distanceToMiddle, coneFactor, nDotL, lightInfluence, lightDistance;
 
     normalizedTransformedNormal = normalize(vTransformedNormal);
@@ -29,8 +29,13 @@ void main(void) {
 
     if(nDotL > 0.) {
         distanceToMiddle = length(cross(vPosition.xyz - uLightPosition, uLightDirection)); //Man kann sich /length(uLightDirection) sparen, da normiert
-        lightInfluence = distanceToMiddle*uLightStrength + lightDistance/uLightStrength;
-        gl_FragColor = vec4((fragmentColor.rgb / lightInfluence) * uLightColor, fragmentColor.a);
+        lightInfluence = (distanceToMiddle / pow(lightDistance, 1.5))*uLightStrength;
+        lightInfluence = max(lightInfluence, .75);
+        //lightInfluence += lightDistance*.6;
+        //lightInfluence = min(.0, lightInfluence);
+        lightDistancePerColor = vec3(lightDistance, lightDistance, lightDistance) * uLightColor;
+        lightDistancePerColor /= uLightStrength/6.;
+        gl_FragColor = vec4((fragmentColor.rgb / (lightInfluence * lightDistancePerColor) * normalize(uLightColor)), fragmentColor.a);
     }
     else gl_FragColor = vec4(uAmbientColor + fragmentColor.rgb, fragmentColor.a);
 

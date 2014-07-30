@@ -20,12 +20,12 @@ var Graphics = {
             z : 10
         };*/
 
-        this.lightStrength = 5;
+        this.lightStrength = 10;
         this.lightPosition = Player.position;
         this.lightColor = {
             r : 1.,
-            g : 1.,
-            b : .7
+            g : .7,
+            b : .3
         };
         this.ambientColor = {
             r : 0,
