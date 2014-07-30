@@ -24,8 +24,8 @@ var Graphics = {
         this.lightPosition = Player.position;
         this.lightColor = {
             r : 1.,
-            g : .7,
-            b : .3
+            g : .95,
+            b : .5
         };
         this.ambientColor = {
             r : 0,
