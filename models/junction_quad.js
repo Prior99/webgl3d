@@ -1,4 +1,4 @@
-{
+new Model({
     name : "junction_quad",
     vertices : [
         //Top
@@ -163,7 +163,7 @@
     ],
 
 
-    textureCoordinates : [
+    textureMap : [
         //Top
           0, .75, //Left
           0, .25,
@@ -243,7 +243,7 @@
         .25,   2,
           0,   2,
     ],
-    indices : [
+    faces : [
         //Top
         0,  1,  2, //Left
         0,  2,  3,
@@ -287,4 +287,4 @@
        68, 69, 70, //Right
        69, 70, 71
     ]
-}
+})

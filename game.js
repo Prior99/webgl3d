@@ -105,7 +105,7 @@ var Game = {
     },
 
     generateFloor : function(width, height) {
-        return {
+        return new Model({
             name : "floor",
             vertices : [
                 -.5, -1, -.5,
@@ -119,21 +119,21 @@ var Game = {
                 0, -1, 0,
                 0, -1, 0
             ],
-            textureCoordinates : [
+            textureMap : [
                 0, 0,
                 width, 0,
                 0, height,
                 width, height
             ],
-            indices : [
+            faces : [
                 0, 1, 2,
                 1, 2, 3
             ]
-        };
+        });
     },
 
     generateCeiling : function(width, height) {
-        return {
+        return new Model({
             name : "ceiling",
             vertices : [
                 -.5, 1, -.5,
@@ -147,17 +147,17 @@ var Game = {
                 0, 1, 0,
                 0, 1, 0
             ],
-            textureCoordinates : [
+            textureMap : [
                 0, 0,
                 width, 0,
                 0, height,
                 width, height
             ],
-            indices : [
+            faces : [
                 0, 1, 2,
                 1, 2, 3
             ]
-        };
+        });
     },
 
     generateMap : function() {

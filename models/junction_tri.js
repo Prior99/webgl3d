@@ -1,4 +1,4 @@
-{
+new Model({
     name : "junction_tri",
     vertices : [
         //Top
@@ -106,7 +106,7 @@
         -1,  0,  0,
         -1,  0,  0
     ],
-    textureCoordinates : [
+    textureMap : [
         //Top
         .25,   1, //Long
         .25,   0,
@@ -160,7 +160,7 @@
         .75,   2
 
     ],
-    indices : [
+    faces : [
         //Top
          0,  1,  2, //Long
          1,  2,  3,
@@ -189,4 +189,4 @@
         44, 45, 46, //Short Right
         45, 46, 47
     ]
-}
+})

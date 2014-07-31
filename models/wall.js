@@ -1,4 +1,4 @@
-{
+new Model({
     name : "wall",
     vertices : [
         -.5,  1, -.25, //0  0 Top
@@ -52,7 +52,7 @@
          0,  0, -1,
          0,  0, -1
     ],
-    textureCoordinates : [
+    textureMap : [
         0, .75, //Top
         0, .25,
         1, .75,
@@ -78,7 +78,7 @@
         0,   2,
         1,   2
     ],
-    indices : [
+    faces : [
          0,  1,  2, //Top
          1,  2,  3,
          4,  5,  6, //Bottom
@@ -93,4 +93,4 @@
         21, 22, 23
 
     ]
-}
+})

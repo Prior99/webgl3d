@@ -1,4 +1,4 @@
-{
+new Model({
     name : "concrete",
     vertices : [
         -1.0, -1.0,  1.0,//Front
@@ -52,7 +52,7 @@
         1,  0,  0,
         1,  0,  0,
     ],
-    textureCoordinates : [
+    textureMap : [
         0.0, 0.0,//Front
         1.0, 0.0,
         1.0, 1.0,
@@ -78,7 +78,7 @@
         1.0, 1.0,
         0.0, 1.0
     ],
-    indices : [
+    faces : [
          0,  1,  2,//Front
          0,  2,  3,
          4,  5,  6,//Back
@@ -92,4 +92,4 @@
         20, 21, 22,//Left
         20, 22, 23
     ]
-}
+})

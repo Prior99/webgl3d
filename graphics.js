@@ -7,7 +7,6 @@ var Graphics = {
         this.modelMatrixStack = [];
         this.projectionMatrix = mat4.create();
         this.initShaders(callback);
-        this.entities = [];
         this.renderTickHandlers = [];
         this.textures = {};
         this.root = new Entity(null);
@@ -74,6 +73,9 @@ var Graphics = {
     },
 
     addEntity : function(entity) {
+        if(!entity.position || !entity.rotation) {
+            console.error("Invalid entity!");
+        }
         this.root.attachChild(entity);
     },
 
@@ -111,19 +113,20 @@ var Graphics = {
         var gl = Graphics.gl;
         var m = {
             vertices : gl.createBuffer(),
-            textureCoordinates : gl.createBuffer(),
-            indices : gl.createBuffer(),
+            textureMap : gl.createBuffer(),
+            faces : gl.createBuffer(),
             normals : gl.createBuffer(),
             texture : null,
             name : model.name,
             vertexCount : model.vertices.length / 3,
-            indexCount : model.indices.length
+            indexCount : model.faces.length
         };
         if(!model.normals) console.error("Model \"" + model.name + "\" is missing normals.");
         if(!model.vertices) console.error("Model \"" + model.name + "\" is missing vertices.");
-        if(!model.name) console.error("Model \"" + model.name + "\" is missing name.");
-        if(!model.textureCoordinates) console.error("Model \"" + model.name + "\" is missing textureCoordinates.");
-        if(!model.indices) console.error("Model \"" + model.name + "\" is missing indices.");
+        if(!model.name) console.warn("Model \"" + model.name + "\" is missing name.");
+        if(!model.description) console.warn("Model \"" + model.name + "\" is missing description.");
+        if(!model.textureMap) console.error("Model \"" + model.name + "\" is missing textureMap.");
+        if(!model.faces) console.error("Model \"" + model.name + "\" is missing faces.");
         if(model.normals.length != model.vertices.length)
             console.error("Model \"" + model.name + "\" has invalid normals count. " + model.normals.length + " != " + model.vertices.length);
         /*
@@ -134,8 +137,8 @@ var Graphics = {
         /*
          * Load texturecoordinates to GPU
          */
-        gl.bindBuffer(gl.ARRAY_BUFFER, m.textureCoordinates);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textureCoordinates), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, m.textureMap);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textureMap), gl.STATIC_DRAW);
         /*
          * Load normals
          */
@@ -144,8 +147,8 @@ var Graphics = {
         /*
          * Load indices to GPU
          */
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.indices);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.faces);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.faces), gl.STATIC_DRAW);
         return m;
     },
 
@@ -207,7 +210,7 @@ var Graphics = {
             /*
              * Map texturecoordinates to shader
              */
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.textureCoordinates);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.textureMap);
             this.gl.vertexAttribPointer(shaderToBind.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
             /*
              * Normals
@@ -218,7 +221,7 @@ var Graphics = {
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, entity.texture);
 
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indices);
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.faces);
             if(entity.shader) {
                 this.gl.useProgram(entity.shader);
             }

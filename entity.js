@@ -6,6 +6,11 @@ var Entity = function(model, texture, shaders) {
             self.texture = tex;
         });
     }
+    else if(model && model.texture) {
+        Graphics.loadTexture(model.texture, function(tex) {
+            self.texture = tex;
+        });
+    }
     this.rotation = {
         x : 0,
         y : 0,

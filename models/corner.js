@@ -1,4 +1,4 @@
-{
+new Model({
 	name : "corner",
 	vertices : [
 		//Top
@@ -90,7 +90,7 @@
 		-1,  0,  0,
 		-1,  0,  0
 	],
-	textureCoordinates : [
+	textureMap : [
 		//Top
 		.25,   1, //Long
 		.75,   1,
@@ -135,7 +135,7 @@
 		.75,   2,
 		  1,   2
 	],
-	indices : [
+	faces : [
 		//Top
 		 0,  1,  2, //Long
 		 1,  2,  3,
@@ -160,4 +160,4 @@
 		36, 37, 38, //Long Right
 		37, 38, 39
 	]
-}
+})
