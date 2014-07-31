@@ -25,7 +25,7 @@ void main(void) {
 
     nDotL = max(dot(lightDirection, normalizedTransformedNormal), 0.);
 
-    fragmentColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    fragmentColor = texture2D(uSampler, vec2(vTextureCoord.x, 1. - vTextureCoord.y));
 
     if(nDotL > 0.) {
         distanceToMiddle = length(cross(vPosition.xyz - uLightPosition, uLightDirection)); //Man kann sich /length(uLightDirection) sparen, da normiert
