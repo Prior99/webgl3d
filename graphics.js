@@ -118,6 +118,7 @@ var Graphics = {
             vertexCount : model.vertices.length / 3,
             indexCount : model.faces.length
         };
+        if(model.init) model.init();
         if(!model.normals) console.error("Model \"" + model.name + "\" is missing normals.");
         if(!model.vertices) console.error("Model \"" + model.name + "\" is missing vertices.");
         if(!model.name) console.warn("Model \"" + model.name + "\" is missing name.");

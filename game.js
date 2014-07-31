@@ -18,7 +18,7 @@ var Game = {
             Game.loadModels(models, function() {
                 console.log("Models loaded.");
                 Game.loadMap(map, function() {
-                    //Game.generateMap();
+                    Game.generateMap();
 					Player.init(Game.startPosition.x, Game.startPosition.y);
                     Graphics.start();
                     console.log("Graphics started.");
@@ -113,10 +113,10 @@ var Game = {
                  .5 + width, -1,  .5 + height,
             ],
             normals : [
-                0, -1, 0,
-                0, -1, 0,
-                0, -1, 0,
-                0, -1, 0
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0
             ],
             textureMap : [
                 0, 0,
@@ -141,10 +141,10 @@ var Game = {
                  .5 + width, 1,  .5 + height,
             ],
             normals : [
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0
             ],
             textureMap : [
                 0, 0,

@@ -17,5 +17,5 @@ void main(void) {
     vPosition = uModelMatrix * vec4(aVertexPosition, 1.);
     gl_Position = uProjectionMatrix * uViewMatrix * vPosition;
     vTextureCoord = aTextureCoord;
-    vTransformedNormal = uNormalMatrix * -aNormals;
+    vTransformedNormal = uNormalMatrix * aNormals;
 }
