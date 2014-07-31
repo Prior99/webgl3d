@@ -43,7 +43,7 @@ var Entity = function(obj) {
             for(var key in obj.shaders.mappings) {
                 self.shader[key] = Graphics.gl.getUniformLocation(self.shader, obj.shaders.mappings[key]);
             }
-            self.shader.prepare = shaders.prepare;
+            self.shader.prepare = obj.shaders.prepare;
             Graphics.gl.useProgram(Graphics.shaderProgram);
         });
     }
