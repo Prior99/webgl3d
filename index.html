@@ -52,12 +52,6 @@
 					document.webkitPointerLockElement == element
 			}
 
-            Array.__proto__.pushAll = function(arr) {
-                for(var i in arr) {
-                    this.push(arr[i]);
-                }
-            }
-
             $(function() {
 				function lock(e) {
 					if(!isPointerLocked()) {
@@ -73,26 +67,10 @@
                 Game.init($("#webgl")[0], "maps/test.js", function(models) {
                     console.log("Game started.");
                     new Entity({
-                        modelFile : "floor.js",
-                        texture : "pentagram.png",
-                        shaders : {
-                            vertex : "pentagram.vert",
-                            fragment : "pentagram.frag",
-                            mappings : {
-                                modelMatrixUniform : "uModelMatrix",
-                                viewMatrixUniform : "uViewMatrix",
-                                projectionMatrixUniform : "uProjectionMatrix",
-                                samplerUniform : "uSampler"
-                            },
-                            prepare : function(shader) {
-                                Graphics.gl.uniformMatrix4fv(shader.viewMatrixUniform, false, Graphics.viewMatrix);
-                                Graphics.gl.uniformMatrix4fv(shader.modelMatrixUniform, false, Graphics.modelMatrix);
-                                Graphics.gl.uniformMatrix4fv(shader.projectionMatrixUniform, false, Graphics.projectionMatrix);
-                                Graphics.gl.uniform1i(shader.samplerUniform, 0);
-                            }
-                        }
+                        modelFile : "button.js",
                     })
-                    .setPosition(2, -0.99999, 1)
+                    .setPosition(3, 0, .75)
+                    .rotate(0, 180, 0)
                     .attachTo(Graphics.root);
                 });
 

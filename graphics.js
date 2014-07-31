@@ -113,7 +113,7 @@ var Graphics = {
             textureMap : gl.createBuffer(),
             faces : gl.createBuffer(),
             normals : gl.createBuffer(),
-            texture : null,
+            texture : model.texture,
             name : model.name,
             vertexCount : model.vertices.length / 3,
             indexCount : model.faces.length

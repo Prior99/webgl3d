@@ -8,6 +8,7 @@ var Game = {
             "junction_tri.js",
             "concreteblock.js",
             "sky.js",
+            "button.js"
         ];
         this.tickHandlers = [];
         setInterval(function() {
