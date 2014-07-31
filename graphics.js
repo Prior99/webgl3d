@@ -2,36 +2,32 @@ var Graphics = {
     init : function(canvas, callback) {
         this.canvas = canvas;
         this.initGL();
+        this.models = {};
         this.modelMatrix = mat4.create();
         this.viewMatrix = mat4.create();
         this.modelMatrixStack = [];
         this.projectionMatrix = mat4.create();
         this.initShaders(callback);
-        this.entities = [];
         this.renderTickHandlers = [];
         this.textures = {};
         this.root = new Entity(null);
         window.addEventListener('resize', function() { //On resize we have to resize our canvas
             Graphics.resize();
         }, false);
-        /*this.lightPosition = {
-            x : 10,
-            y : 1,
-            z : 10
-        };*/
 
-        this.lightStrength = 5;
+        this.lightStrength = 12;
         this.lightPosition = Player.position;
         this.lightColor = {
-            r : .7,
-            g : .7,
+            r : 1.,
+            g : .95,
             b : .5
         };
         this.ambientColor = {
-            r : .1,
-            g : .1,
-            b : .2
+            r : 0,
+            g : 0,
+            b : 0
         };
+        this.lightStrengthFlicker = this.lightStrength;
         this.resize();
     },
 
@@ -55,7 +51,7 @@ var Graphics = {
                 self.textures[url] = tex;
                 callback(tex);
             }
-            img.src = url;
+            img.src = "textures/" + url;
         }
     },
 
@@ -66,11 +62,16 @@ var Graphics = {
     start : function() {
         this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
         this.gl.enable(Graphics.gl.DEPTH_TEST); //So things behind other things are hidden
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.viewport(0, 0, this.width, this.height);
         this.redraw();
     },
 
     addEntity : function(entity) {
+        if(!entity.position || !entity.rotation) {
+            console.error("Invalid entity!");
+        }
         this.root.attachChild(entity);
     },
 
@@ -80,25 +81,26 @@ var Graphics = {
 
     loadModels : function(models, callback) {
         var models2 = models.slice();
-        var result = {};
         var gl = this.gl;
         function recurse() {
             if(models2.length == 0) {
-                callback(result);
+                callback();
             }
             else {
                 var url = models2.pop();
                 $.ajax({
-                    url : url,
+                    url : "models/" + url,
                     dataType : "text",
                     cache : false,
-                    success : loadModel
+                    success : function(data) {
+                        loadModel(url, data);
+                    }
                 });
             }
         }
-        function loadModel(data) {
+        function loadModel(url, data) {
             var model = eval("(" + data + ")");
-            result[model.name] = Graphics.loadModel(model);
+            Graphics.models[url] = Graphics.loadModel(model);
             recurse();
         }
         recurse();
@@ -108,19 +110,21 @@ var Graphics = {
         var gl = Graphics.gl;
         var m = {
             vertices : gl.createBuffer(),
-            textureCoordinates : gl.createBuffer(),
-            indices : gl.createBuffer(),
+            textureMap : gl.createBuffer(),
+            faces : gl.createBuffer(),
             normals : gl.createBuffer(),
-            texture : null,
+            texture : model.texture,
             name : model.name,
             vertexCount : model.vertices.length / 3,
-            indexCount : model.indices.length
+            indexCount : model.faces.length
         };
+        if(model.init) model.init();
         if(!model.normals) console.error("Model \"" + model.name + "\" is missing normals.");
         if(!model.vertices) console.error("Model \"" + model.name + "\" is missing vertices.");
-        if(!model.name) console.error("Model \"" + model.name + "\" is missing name.");
-        if(!model.textureCoordinates) console.error("Model \"" + model.name + "\" is missing textureCoordinates.");
-        if(!model.indices) console.error("Model \"" + model.name + "\" is missing indices.");
+        if(!model.name) console.warn("Model \"" + model.name + "\" is missing name.");
+        if(!model.description) console.warn("Model \"" + model.name + "\" is missing description.");
+        if(!model.textureMap) console.error("Model \"" + model.name + "\" is missing textureMap.");
+        if(!model.faces) console.error("Model \"" + model.name + "\" is missing faces.");
         if(model.normals.length != model.vertices.length)
             console.error("Model \"" + model.name + "\" has invalid normals count. " + model.normals.length + " != " + model.vertices.length);
         /*
@@ -131,8 +135,8 @@ var Graphics = {
         /*
          * Load texturecoordinates to GPU
          */
-        gl.bindBuffer(gl.ARRAY_BUFFER, m.textureCoordinates);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textureCoordinates), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, m.textureMap);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textureMap), gl.STATIC_DRAW);
         /*
          * Load normals
          */
@@ -141,8 +145,8 @@ var Graphics = {
         /*
          * Load indices to GPU
          */
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.indices);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.faces);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.faces), gl.STATIC_DRAW);
         return m;
     },
 
@@ -157,13 +161,19 @@ var Graphics = {
         mat4.rotateX(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.x));
         mat4.rotateY(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.y));
         mat4.rotateZ(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.z));
+        var tmp = mat4.create();
+        mat4.transpose(tmp, this.viewMatrix);
+        var rotation = vec3.fromValues(0, 0, 1);
+        vec3.transformMat4(rotation, rotation, tmp);
+        vec3.normalize(rotation, rotation);
+        if(Math.random() > 0.6) this.lightStrengthFlicker = this.lightStrength * (Math.random()*.2 + .9);
         mat4.translate(this.viewMatrix, this.viewMatrix, [-Player.position.x, -Player.position.y, -Player.position.z]);
-
-
-        this.gl.uniform1f(this.shaderProgram.lightStrengthUniform, this.lightStrength);
+        this.gl.uniform1f(this.shaderProgram.lightStrengthUniform, this.lightStrengthFlicker);
         this.gl.uniform3f(this.shaderProgram.lightPositionUniform, this.lightPosition.x, this.lightPosition.y, this.lightPosition.z);
         this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
         this.gl.uniform3f(this.shaderProgram.ambientColorUniform, this.ambientColor.r, this.ambientColor.g, this.ambientColor.b);
+        this.gl.uniform3f(this.shaderProgram.lightDirectionUniform, rotation[0], rotation[1], rotation[2]);
+        this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
         this.drawEntity(this.root);
         Info.reportDraw();
         window.requestAnimationFrame(function() {
@@ -179,30 +189,48 @@ var Graphics = {
         mat4.rotateY(this.modelMatrix, this.modelMatrix, degToRad(entity.rotation.y));
         mat4.rotateZ(this.modelMatrix, this.modelMatrix, degToRad(entity.rotation.z));
         if(entity.model) {
+            var shaderToBind;
+            if(entity.shader) {
+                this.gl.useProgram(entity.shader);
+                shaderToBind = entity.shader;
+                entity.shader.prepare(entity.shader);
+            }
+            else {
+                shaderToBind = this.shaderProgram;
+                this.setMatrixUniforms();
+            }
+
             /*
              * Map vertices to shader
              */
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.vertices);
-            this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(shaderToBind.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
             /*
              * Map texturecoordinates to shader
              */
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.textureCoordinates);
-            this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.textureMap);
+            this.gl.vertexAttribPointer(shaderToBind.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
             /*
              * Normals
              */
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, entity.model.normals);
-            this.gl.vertexAttribPointer(this.shaderProgram.normalsAttribute, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(shaderToBind.normalsAttribute, 3, this.gl.FLOAT, false, 0, 0);
 
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, entity.texture);
-            this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
 
-            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.indices);
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.faces);
+            if(entity.shader) {
+                this.gl.useProgram(entity.shader);
+            }
+            else {
+                this.setMatrixUniforms();
+            }
 
-            this.setMatrixUniforms();
             this.gl.drawElements(this.gl.TRIANGLES, entity.model.indexCount, this.gl.UNSIGNED_SHORT, 0);
+            if(entity.shader) {
+                this.gl.useProgram(Graphics.shaderProgram);
+            }
         }
         for(var i in entity.children) {
             Graphics.drawEntity(entity.children[i]);
@@ -276,6 +304,7 @@ var Graphics = {
             Graphics.shaderProgram.normalsAttribute = gl.getAttribLocation(Graphics.shaderProgram, "aNormals");
             gl.enableVertexAttribArray(Graphics.shaderProgram.normalsAttribute);
 
+            Graphics.shaderProgram.lightDirectionUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightDirection");
             Graphics.shaderProgram.ambientColorUniform = gl.getUniformLocation(Graphics.shaderProgram, "uAmbientColor");
             Graphics.shaderProgram.lightColorUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightColor");
             Graphics.shaderProgram.lightPositionUniform = gl.getUniformLocation(Graphics.shaderProgram, "uLightPosition");

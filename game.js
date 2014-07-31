@@ -1,13 +1,14 @@
 var Game = {
     init : function(canvas, map, callback){
         var models = [
-            "models/junction_quad.js",
-            "models/wall.js",
-            "models/corner.js",
-            "models/floor.js",
-            "models/junction_tri.js",
-            "models/concreteblock.js",
-            "models/sky.js",
+            "junction_quad.js",
+            "wall.js",
+            "corner.js",
+            "floor.js",
+            "junction_tri.js",
+            "concreteblock.js",
+            "sky.js",
+            "button.js"
         ];
         this.tickHandlers = [];
         setInterval(function() {
@@ -16,7 +17,7 @@ var Game = {
         Graphics.init($("canvas")[0], function() {
             console.log("Graphics initialized.");
             Game.loadModels(models, function() {
-                  console.log("Models loaded.");
+                console.log("Models loaded.");
                 Game.loadMap(map, function() {
                     Game.generateMap();
 					Player.init(Game.startPosition.x, Game.startPosition.y);
@@ -53,8 +54,7 @@ var Game = {
 
     loadModels : function(models, callback) {
         var self = this;
-        Graphics.loadModels(models, function(models) {
-            self.models = models;
+        Graphics.loadModels(models, function() {
             callback();
         });
     },
@@ -105,7 +105,7 @@ var Game = {
     },
 
     generateFloor : function(width, height) {
-        return {
+        return new Model({
             name : "floor",
             vertices : [
                 -.5, -1, -.5,
@@ -114,26 +114,26 @@ var Game = {
                  .5 + width, -1,  .5 + height,
             ],
             normals : [
-                0, -1, 0,
-                0, -1, 0,
-                0, -1, 0,
-                0, -1, 0
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0
             ],
-            textureCoordinates : [
+            textureMap : [
                 0, 0,
                 width, 0,
                 0, height,
                 width, height
             ],
-            indices : [
+            faces : [
                 0, 1, 2,
                 1, 2, 3
             ]
-        };
+        });
     },
 
     generateCeiling : function(width, height) {
-        return {
+        return new Model({
             name : "ceiling",
             vertices : [
                 -.5, 1, -.5,
@@ -142,22 +142,22 @@ var Game = {
                  .5 + width, 1,  .5 + height,
             ],
             normals : [
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0
             ],
-            textureCoordinates : [
+            textureMap : [
                 0, 0,
                 width, 0,
                 0, height,
                 width, height
             ],
-            indices : [
+            faces : [
                 0, 1, 2,
                 1, 2, 3
             ]
-        };
+        });
     },
 
     generateMap : function() {
@@ -169,81 +169,128 @@ var Game = {
 		/*new Entity(this.models["sky"], "textures/clouds.jpg")
 			.setPosition(this.dimension.width/2, 100, this.dimension.height/2)
 			.attachTo(Graphics.root);*/
-        new Entity(floor, "textures/tiles.jpg").attachTo(Graphics.root);
-        new Entity(ceiling, "textures/wood.jpg").attachTo(Graphics.root);
+        new Entity({
+            model : floor,
+            texture : "tiles.jpg"
+        }).attachTo(Graphics.root);
+        new Entity({
+            model : ceiling,
+            texture : "wood.jpg"
+        }).attachTo(Graphics.root);
         for(var y = 0; y < this.dimension.height; y++) {
             for(var x = 0; x < this.dimension.width; x++) {
-                /*new Entity(this.models["floor"], "textures/tiles.jpg")
-                    .setPosition(x, -1, y)
-                    .attachTo(Graphics.root);
-                new Entity(this.models["floor"], "textures/wood.jpg")
-                    .setPosition(x, 1, y)
-                    .rotate(180, 0, 0)
-                    .attachTo(Graphics.root);*/
-				if(this.map[y][x]) {
+                if(this.map[y][x]) {
 					var entity;
-					var texture = "textures/bricks.jpg";
+					var texture = "bricks.jpg";
 					var a = y > 0 && this.map[y - 1][x],
 						b = y < this.dimension.height - 1 && this.map[y + 1][x],
 						c = x > 0 && this.map[y][x - 1],
 						d = x < this.dimension.width - 1 && this.map[y][x + 1];
 					if(!a && !b && !c && !d) { //Derzeit undefiniert ??? Garkeine
-						entity = new Entity(this.models["wall"], texture)
-							.rotate(0, 90, 0);
+						entity = new Entity({
+                            modelFile : "wall.js",
+                            texture : texture
+                        })
+						.rotate(0, 90, 0);
 					}
 					if(!a && !b && !c && d) { //Derzeit undefiniert ??? Waagerechte Linie
-						entity = new Entity(this.models["wall"], texture);
+						entity = new Entity({
+                            modelFile : "wall.js",
+                            texture : texture
+                        });
 					}
 					if(!a && !b && c && !d) { //Derzeit undefiniert ??? Waagerechte Linie
-						entity = new Entity(this.models["wall"], texture);
+						entity = new Entity({
+                            modelFile : "wall.js",
+                            texture : texture
+                        });
 					}
 					if(!a && !b && c && d) { //Waagerechte Linie
-						entity = new Entity(this.models["wall"], texture);
+						entity = new Entity({
+                            modelFile : "wall.js",
+                            texture : texture
+                        });
 					}
 					if(!a && b && !c && !d) { //Derzeit undefiniert ??? Senkrechte Linie
-						entity = new Entity(this.models["wall"], texture)
-							.rotate(0, 90, 0);
+						entity = new Entity({
+                            modelFile : "wall.js",
+                            texture : texture
+                        })
+						.rotate(0, 90, 0);
 					}
 					if(!a && b && !c && d) { //Ecke Unten-Rechts
-						entity = new Entity(this.models["corner"], texture)
-							.rotate(0, 270, 0);
+						entity = new Entity({
+                            modelFile : "corner.js",
+                            texture : texture
+                        })
+						.rotate(0, 270, 0);
 					}
 					if(!a && b && c && !d) { //Ecke Unten-Links
-						entity = new Entity(this.models["corner"], texture)
-							.rotate(0, 180, 0);
+						entity = new Entity({
+                            modelFile : "corner.js",
+                            texture : texture
+                        })
+						.rotate(0, 180, 0);
 					}
 					if(!a && b && c && d) { //Dreierkreuzung Nicht-Oben
-						entity = new Entity(this.models["junction_tri"], texture)
-							.rotate(0, 270, 0);
+						entity = new Entity({
+                            modelFile : "junction_tri.js",
+                            texture : texture
+                        })
+						.rotate(0, 270, 0);
 					}
 					if(a && !b && !c && !d) { //Derzeit undefiniert ??? Senkrechte Linie
-						entity = new Entity(this.models["wall"], texture)
-							.rotate(0, 90, 0);
+						entity = new Entity({
+                            modelFile : "wall.js",
+                            texture : texture
+                        })
+						.rotate(0, 90, 0);
 					}
 					if(a && !b && !c && d) { //Ecke Oben-Rechts
-						entity = new Entity(this.models["corner"], texture);
+						entity = new Entity({
+                            modelFile : "corner.js",
+                            texture : texture
+                        });
 					}
 					if(a && !b && c && !d) { //Ecke Oben-Links
-						entity = new Entity(this.models["corner"], texture)
-							.rotate(0, 90, 0);
+						entity = new Entity({
+                            modelFile : "corner.js",
+                            texture : texture
+                        })
+						.rotate(0, 90, 0);
 					}
 					if(a && !b && c && d) { //Dreierkreuzung Nicht-Unten
-						entity = new Entity(this.models["junction_tri"], texture)
-							.rotate(0, 90, 0);
+						entity = new Entity({
+                            modelFile : "junction_tri.js",
+                            texture : texture
+                        })
+						.rotate(0, 90, 0);
 					}
 					if(a && b && !c && !d) { //Senkrechte Linie
-						entity = new Entity(this.models["wall"], texture)
-							.rotate(0, 90, 0);
+						entity = new Entity({
+                            modelFile : "wall.js",
+                            texture : texture
+                        })
+						.rotate(0, 90, 0);
 					}
 					if(a && b && !c && d) { //Dreierkreuzung Nicht-Links
-						entity = new Entity(this.models["junction_tri"], texture);
+						entity = new Entity({
+                            modelFile : "junction_tri.js",
+                            texture : texture
+                        });
 					}
 					if(a && b && c && !d) { //Dreierkreuzung Nicht-Rechts
-						entity = new Entity(this.models["junction_tri"], texture)
-							.rotate(0, 180, 0);
+						entity = new Entity({
+                            modelFile : "junction_tri.js",
+                            texture : texture
+                        })
+						.rotate(0, 180, 0);
 					}
 					if(a && b && c && d) { //Viererkreuzung
-						entity = new Entity(this.models["junction_quad"], texture);
+						entity = new Entity({
+                            modelFile : "junction_quad.js",
+                            texture : texture
+                        });
 					}
 					entity
 						.attachTo(Graphics.root)
