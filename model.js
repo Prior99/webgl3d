@@ -38,7 +38,7 @@ var pushAll = function(array, arr) {
 
 Model.prototype = {
     triangle : function(p1, p2, p3, n, tex1, tex2, tex3) {
-        var len = this.vertices.length;
+        var len = this.vertices.length/3;
         pushAll(this.vertices, p1);
         pushAll(this.vertices, p2);
         pushAll(this.vertices, p3);
@@ -50,10 +50,10 @@ Model.prototype = {
         pushAll(this.textureMap, tex2);
         pushAll(this.textureMap, tex3);
     },
-    quad : function(p1, p2, p3, p4, n, tex1, tex3) {
-        var len = this.vertices.length;
-        var tex2 = [tex1[0], tex3[1]];
-        var tex4 = [tex1[1], tex3[0]];
+    quad : function(p1, p2, p3, p4, n, tex1, tex4) {
+        var len = this.vertices.length/3;
+        var tex2 = [tex4[0], tex1[1]];
+        var tex3 = [tex1[0], tex4[1]];
         pushAll(this.vertices, p1);
         pushAll(this.vertices, p2);
         pushAll(this.vertices, p3);
