@@ -7,8 +7,8 @@ var Entity = function(obj) {
             self.texture = tex;
         });
     }
-    else if(model && model.texture) {
-        Graphics.loadTexture(model.texture, function(tex) {
+    else if(this.model && this.model.texture) {
+        Graphics.loadTexture(this.model.texture, function(tex) {
             self.texture = tex;
         });
     }
