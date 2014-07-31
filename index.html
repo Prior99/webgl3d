@@ -65,7 +65,7 @@
 
                 Game.init($("#webgl")[0], "maps/test.js", function(models) {
                     console.log("Game started.");
-                    new Entity(models["floor"], "textures/pentagram.png", {
+                    new Entity("floor.js", "pentagram.png", {
                         vertex : "pentagram.vert",
                         fragment : "pentagram.frag",
                         mappings : {
