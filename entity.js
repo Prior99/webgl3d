@@ -1,8 +1,9 @@
-var Entity = function(model, texture, shaders) {
-    this.model = model;
+var Entity = function(obj) {
+    if(obj && obj.modelFile) this.model = Graphics.models[obj.modelFile];
+    if(obj && obj.model) this.model = obj.model;
     var self = this;
-    if(texture) {
-        Graphics.loadTexture(texture, function(tex) {
+    if(obj && obj.texture) {
+        Graphics.loadTexture(obj.texture, function(tex) {
             self.texture = tex;
         });
     }
@@ -23,9 +24,9 @@ var Entity = function(model, texture, shaders) {
     }
     this.children = [];
     this.parent = null;
-    if(shaders !== undefined) {
+    if(obj && obj.shaders !== undefined) {
         var self = this;
-        Graphics.loadShaders(shaders, function(vertex, fragment) {
+        Graphics.loadShaders(obj.shaders, function(vertex, fragment) {
             self.shader = Graphics.gl.createProgram();
             Graphics.gl.attachShader(self.shader, vertex);
             Graphics.gl.attachShader(self.shader, fragment);
@@ -44,10 +45,10 @@ var Entity = function(model, texture, shaders) {
             self.shader.normalsAttribute = Graphics.gl.getAttribLocation(self.shader, "aNormals");
             Graphics.gl.enableVertexAttribArray(self.shader.normalsAttribute);
 
-            for(var key in shaders.mappings) {
-                self.shader[key] = Graphics.gl.getUniformLocation(self.shader, shaders.mappings[key]);
+            for(var key in obj.shaders.mappings) {
+                self.shader[key] = Graphics.gl.getUniformLocation(self.shader, obj.shaders.mappings[key]);
             }
-            self.shader.prepare = shaders.prepare;
+            self.shader.prepare = obj.shaders.prepare;
             Graphics.gl.useProgram(Graphics.shaderProgram);
         });
     }

@@ -2,6 +2,7 @@ var Graphics = {
     init : function(canvas, callback) {
         this.canvas = canvas;
         this.initGL();
+        this.models = {};
         this.modelMatrix = mat4.create();
         this.viewMatrix = mat4.create();
         this.modelMatrixStack = [];
@@ -13,11 +14,6 @@ var Graphics = {
         window.addEventListener('resize', function() { //On resize we have to resize our canvas
             Graphics.resize();
         }, false);
-        /*this.lightPosition = {
-            x : 10,
-            y : 1,
-            z : 10
-        };*/
 
         this.lightStrength = 12;
         this.lightPosition = Player.position;
@@ -55,7 +51,7 @@ var Graphics = {
                 self.textures[url] = tex;
                 callback(tex);
             }
-            img.src = url;
+            img.src = "textures/" + url;
         }
     },
 
@@ -85,25 +81,26 @@ var Graphics = {
 
     loadModels : function(models, callback) {
         var models2 = models.slice();
-        var result = {};
         var gl = this.gl;
         function recurse() {
             if(models2.length == 0) {
-                callback(result);
+                callback();
             }
             else {
                 var url = models2.pop();
                 $.ajax({
-                    url : url,
+                    url : "models/" + url,
                     dataType : "text",
                     cache : false,
-                    success : loadModel
+                    success : function(data) {
+                        loadModel(url, data);
+                    }
                 });
             }
         }
-        function loadModel(data) {
+        function loadModel(url, data) {
             var model = eval("(" + data + ")");
-            result[model.name] = Graphics.loadModel(model);
+            Graphics.models[url] = Graphics.loadModel(model);
             recurse();
         }
         recurse();

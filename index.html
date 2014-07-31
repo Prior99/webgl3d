@@ -66,24 +66,28 @@
 
                 Game.init($("#webgl")[0], "maps/test.js", function(models) {
                     console.log("Game started.");
-                    new Entity(models["floor"], "textures/pentagram.png", {
-                        vertex : "pentagram.vert",
-                        fragment : "pentagram.frag",
-                        mappings : {
-                            modelMatrixUniform : "uModelMatrix",
-                            viewMatrixUniform : "uViewMatrix",
-                            projectionMatrixUniform : "uProjectionMatrix",
-                            samplerUniform : "uSampler"
-                        },
-                        prepare : function(shader) {
-                            Graphics.gl.uniformMatrix4fv(shader.viewMatrixUniform, false, Graphics.viewMatrix);
-                            Graphics.gl.uniformMatrix4fv(shader.modelMatrixUniform, false, Graphics.modelMatrix);
-                            Graphics.gl.uniformMatrix4fv(shader.projectionMatrixUniform, false, Graphics.projectionMatrix);
-                            Graphics.gl.uniform1i(shader.samplerUniform, 0);
+                    new Entity({
+                        modelFile : "floor.js",
+                        texture : "pentagram.png",
+                        shaders : {
+                            vertex : "pentagram.vert",
+                            fragment : "pentagram.frag",
+                            mappings : {
+                                modelMatrixUniform : "uModelMatrix",
+                                viewMatrixUniform : "uViewMatrix",
+                                projectionMatrixUniform : "uProjectionMatrix",
+                                samplerUniform : "uSampler"
+                            },
+                            prepare : function(shader) {
+                                Graphics.gl.uniformMatrix4fv(shader.viewMatrixUniform, false, Graphics.viewMatrix);
+                                Graphics.gl.uniformMatrix4fv(shader.modelMatrixUniform, false, Graphics.modelMatrix);
+                                Graphics.gl.uniformMatrix4fv(shader.projectionMatrixUniform, false, Graphics.projectionMatrix);
+                                Graphics.gl.uniform1i(shader.samplerUniform, 0);
+                            }
                         }
                     })
-                        .setPosition(2, -0.99999, 1)
-                        .attachTo(Graphics.root);
+                    .setPosition(2, -0.99999, 1)
+                    .attachTo(Graphics.root);
                 });
 
                 Info.init($("#info")[0]);
