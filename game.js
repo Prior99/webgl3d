@@ -18,7 +18,7 @@ var Game = {
             Game.loadModels(models, function() {
                 console.log("Models loaded.");
                 Game.loadMap(map, function() {
-                    Game.generateMap();
+                    //Game.generateMap();
 					Player.init(Game.startPosition.x, Game.startPosition.y);
                     Graphics.start();
                     console.log("Graphics started.");

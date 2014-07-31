@@ -24,7 +24,7 @@ var Entity = function(obj) {
     }
     this.children = [];
     this.parent = null;
-    if(obj && obj.shaders !== undefined) {
+    if(obj && obj.shaders) {
         var self = this;
         Graphics.loadShaders(obj.shaders, function(vertex, fragment) {
             self.shader = Graphics.gl.createProgram();
@@ -84,12 +84,18 @@ Entity.prototype = {
     },
 
     attachChild : function(entity) {
+        if(!entity.position || !entity.rotation) {
+            console.error("Invalid entity!");
+        }
         this.children.push(entity);
         entity.parent = this;
         return this;
     },
 
     attachTo : function(entity) {
+        if(!this.position || !this.rotation) {
+            console.error("Invalid entity!");
+        }
         entity.attachChild(this);
         return this;
     },

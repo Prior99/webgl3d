@@ -65,9 +65,3 @@ Model.prototype = {
 
     }
 };
-
-Array.prototype.pushAll = function(arr) {
-    for(var i in arr) {
-        this.push(arr[i]);
-    }
-}
