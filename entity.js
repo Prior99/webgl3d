@@ -13,15 +13,19 @@ var Entity = function(obj) {
     };
 
     if(obj) {
-        if(obj.modelFile) this.model = Graphics.models[obj.modelFile];
+        if(obj.modelFile) {
+            Graphics.loadModel(obj.modelFile, function(model) {
+                self.model = model;
+                if(!self.texture && self.model && self.model.texture) {
+                    Graphics.loadTexture(self.model.texture, function(tex) {
+                        self.texture = tex;
+                    });
+                }
+            });
+        }
         if(obj.model) this.model = obj.model;
         if(obj.texture) {
             Graphics.loadTexture(obj.texture, function(tex) {
-                self.texture = tex;
-            });
-        }
-        else if(this.model && this.model.texture) {
-            Graphics.loadTexture(this.model.texture, function(tex) {
                 self.texture = tex;
             });
         }

@@ -3,6 +3,7 @@ var Graphics = {
         this.canvas = canvas;
         this.initGL();
         this.models = {};
+        this.modelsLoading = {};
         this.modelMatrix = mat4.create();
         this.viewMatrix = mat4.create();
         this.modelMatrixStack = [];
@@ -10,6 +11,7 @@ var Graphics = {
         this.initShaders(callback);
         this.renderTickHandlers = [];
         this.textures = {};
+        this.texturesLoading = {};
         this.root = new Entity(null);
         window.addEventListener('resize', function() { //On resize we have to resize our canvas
             Graphics.resize();
@@ -36,22 +38,34 @@ var Graphics = {
         var self = this;
         if(this.textures[url]) callback(this.textures[url]);
         else {
-            var img = new Image();
-            img.onload = function() {
-                var tex = gl.createTexture();
-                gl.bindTexture(gl.TEXTURE_2D, tex);
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-                //gl.generateMipmap(gl.TEXTURE_2D);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-                self.textures[url] = tex;
-                callback(tex);
+            var tl;
+            if(tl = this.texturesLoading[url]) {
+                tl.push(callback);
             }
-            img.src = "textures/" + url;
+            else {
+                console.log("Fetching texture " + url);
+                tl = this.texturesLoading[url] = [];
+                tl.push(callback);
+                var img = new Image();
+                img.onload = function() {
+                    var tex = gl.createTexture();
+                    gl.bindTexture(gl.TEXTURE_2D, tex);
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+                    //gl.generateMipmap(gl.TEXTURE_2D);
+                    gl.bindTexture(gl.TEXTURE_2D, null);
+                    self.textures[url] = tex;
+                    for(var key in tl) {
+                        tl[key](tex);
+                    }
+                    self.texturesLoading[url] = undefined;
+                }
+                img.src = "textures/" + url;
+            }
         }
     },
 
@@ -79,34 +93,37 @@ var Graphics = {
         this.root.detachChild(entity);
     },
 
-    loadModels : function(models, callback) {
-        var models2 = models.slice();
-        var gl = this.gl;
-        function recurse() {
-            if(models2.length == 0) {
-                callback();
+    loadModel : function(url, callback) {
+        if(this.models[url]) {
+            callback(this.models[url]);
+        }
+        else {
+            var ml;
+            if(ml = this.modelsLoading[url]) {
+                ml.push(callback);
             }
             else {
-                var url = models2.pop();
+                ml = this.modelsLoading[url] = [];
+                ml.push(callback);
+                console.log("Fetching model " + url);
                 $.ajax({
                     url : "models/" + url,
                     dataType : "text",
                     cache : false,
                     success : function(data) {
-                        loadModel(url, data);
+                        var model = eval("(" + data + ")");
+                        Graphics.models[url] = model = Graphics.bindModel(model);
+                        for(var key in ml) {
+                            ml[key](model);
+                        }
+                        Graphics.modelsLoading[url] = undefined;
                     }
                 });
             }
         }
-        function loadModel(url, data) {
-            var model = eval("(" + data + ")");
-            Graphics.models[url] = Graphics.loadModel(model);
-            recurse();
-        }
-        recurse();
     },
 
-    loadModel : function(model, callback) {
+    bindModel : function(model, callback) {
         var gl = Graphics.gl;
         var m = {
             vertices : gl.createBuffer(),
@@ -121,8 +138,6 @@ var Graphics = {
         if(model.init) model.init();
         if(!model.normals) console.error("Model \"" + model.name + "\" is missing normals.");
         if(!model.vertices) console.error("Model \"" + model.name + "\" is missing vertices.");
-        if(!model.name) console.warn("Model \"" + model.name + "\" is missing name.");
-        if(!model.description) console.warn("Model \"" + model.name + "\" is missing description.");
         if(!model.textureMap) console.error("Model \"" + model.name + "\" is missing textureMap.");
         if(!model.faces) console.error("Model \"" + model.name + "\" is missing faces.");
         if(model.normals.length != model.vertices.length)

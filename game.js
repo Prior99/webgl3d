@@ -1,15 +1,5 @@
 var Game = {
     init : function(canvas, map, callback){
-        var models = [
-            "junction_quad.js",
-            "wall.js",
-            "corner.js",
-            "floor.js",
-            "junction_tri.js",
-            "concreteblock.js",
-            "sky.js",
-            "button.js"
-        ];
         this.doohickeys = [];
         this.selectedDoohickey = null;
         this.tickHandlers = [];
@@ -18,15 +8,12 @@ var Game = {
         }, 1000/60);
         Graphics.init($("canvas")[0], function() {
             console.log("Graphics initialized.");
-            Game.loadModels(models, function() {
-                console.log("Models loaded.");
-                Game.loadMap(map, function() {
-                    Game.generateMap();
-					Player.init(Game.startPosition.x, Game.startPosition.y);
-                    Graphics.start();
-                    console.log("Graphics started.");
-                    callback();
-                });
+            Game.loadMap(map, function() {
+                Game.generateMap();
+				Player.init(Game.startPosition.x, Game.startPosition.y);
+                Graphics.start();
+                console.log("Graphics started.");
+                callback();
             });
         });
     },
@@ -53,13 +40,6 @@ var Game = {
 			return true;
 		}
 	},
-
-    loadModels : function(models, callback) {
-        var self = this;
-        Graphics.loadModels(models, function() {
-            callback();
-        });
-    },
 
     loadMap : function(file, callback) {
         this.map = [];
@@ -163,8 +143,8 @@ var Game = {
     },
 
     generateMap : function() {
-        var floor = Graphics.loadModel(this.generateFloor(this.dimension.width, this.dimension.height));
-        var ceiling = Graphics.loadModel(this.generateCeiling(this.dimension.width, this.dimension.height));
+        var floor = Graphics.bindModel(this.generateFloor(this.dimension.width, this.dimension.height));
+        var ceiling = Graphics.bindModel(this.generateCeiling(this.dimension.width, this.dimension.height));
         /*new Entity(this.models["concrete"], "textures/bricks.jpg")
                     .attachTo(Graphics.root)
                     .setPosition(0, 0, 0);*/
