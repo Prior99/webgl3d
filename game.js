@@ -191,9 +191,9 @@ var Game = {
 					if(!a && !b && !c && !d) { //Derzeit undefiniert ??? Garkeine
 						entity = new Entity({
                             modelFile : "wall.js",
-                            texture : texture
-                        })
-						.rotate(0, 90, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 90, z : 0}
+                        });
 					}
 					if(!a && !b && !c && d) { //Derzeit undefiniert ??? Waagerechte Linie
 						entity = new Entity({
@@ -216,37 +216,37 @@ var Game = {
 					if(!a && b && !c && !d) { //Derzeit undefiniert ??? Senkrechte Linie
 						entity = new Entity({
                             modelFile : "wall.js",
-                            texture : texture
-                        })
-						.rotate(0, 90, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 90, z : 0}
+                        });
 					}
 					if(!a && b && !c && d) { //Ecke Unten-Rechts
 						entity = new Entity({
                             modelFile : "corner.js",
-                            texture : texture
-                        })
-						.rotate(0, 270, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 270, z : 0}
+                        });
 					}
 					if(!a && b && c && !d) { //Ecke Unten-Links
 						entity = new Entity({
                             modelFile : "corner.js",
-                            texture : texture
-                        })
-						.rotate(0, 180, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 180, z : 0}
+                        });
 					}
 					if(!a && b && c && d) { //Dreierkreuzung Nicht-Oben
 						entity = new Entity({
                             modelFile : "junction_tri.js",
-                            texture : texture
-                        })
-						.rotate(0, 270, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 270, z : 0}
+                        });
 					}
 					if(a && !b && !c && !d) { //Derzeit undefiniert ??? Senkrechte Linie
 						entity = new Entity({
                             modelFile : "wall.js",
-                            texture : texture
-                        })
-						.rotate(0, 90, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 90, z : 0}
+                        });
 					}
 					if(a && !b && !c && d) { //Ecke Oben-Rechts
 						entity = new Entity({
@@ -257,23 +257,23 @@ var Game = {
 					if(a && !b && c && !d) { //Ecke Oben-Links
 						entity = new Entity({
                             modelFile : "corner.js",
-                            texture : texture
-                        })
-						.rotate(0, 90, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 90, z : 0}
+                        });
 					}
 					if(a && !b && c && d) { //Dreierkreuzung Nicht-Unten
 						entity = new Entity({
                             modelFile : "junction_tri.js",
-                            texture : texture
-                        })
-						.rotate(0, 90, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 90, z : 0}
+                        });
 					}
 					if(a && b && !c && !d) { //Senkrechte Linie
 						entity = new Entity({
                             modelFile : "wall.js",
-                            texture : texture
-                        })
-						.rotate(0, 90, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 90, z : 0}
+                        });
 					}
 					if(a && b && !c && d) { //Dreierkreuzung Nicht-Links
 						entity = new Entity({
@@ -284,9 +284,9 @@ var Game = {
 					if(a && b && c && !d) { //Dreierkreuzung Nicht-Rechts
 						entity = new Entity({
                             modelFile : "junction_tri.js",
-                            texture : texture
-                        })
-						.rotate(0, 180, 0);
+                            texture : texture,
+                            rotation : {x : 0, y : 180, z : 0}
+                        });
 					}
 					if(a && b && c && d) { //Viererkreuzung
 						entity = new Entity({
@@ -295,7 +295,6 @@ var Game = {
                         });
 					}
 					entity
-						.attachTo(Graphics.root)
 						.setPosition(x, 0, y);
 				}
             }

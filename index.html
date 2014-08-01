@@ -68,11 +68,13 @@
                     console.log("Game started.");
                     new Entity({
                         modelFile : "button.js",
-                        selectable : true
-                    })
-                    .setPosition(3, 0, .75)
-                    .rotate(0, 180, 0)
-                    .attachTo(Graphics.root);
+                        selectable : true,
+                        interact : function() {
+                            console.log("BADABOOM");
+                        },
+                        position: {x : 3, y : 0, z : 0.75},
+                        rotation : {x : 0, y : 180, z : 0}
+                    });
                 });
 
                 Info.init($("#info")[0]);

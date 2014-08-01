@@ -63,6 +63,10 @@ var Player = {
             if(e.which == 83) Player.currentKeyboard.s = false;
             if(e.which == 68) Player.currentKeyboard.d = false;
         });
+        document.addEventListener("mouseup", function(e) {
+            if(Game.selectedDoohickey)
+                Game.selectedDoohickey.interact();
+        });
         document.addEventListener("mousemove", function(e) {
 			if(!isPointerLocked()) return;
             var x = e.movementX || e.webkitMovementX || e.mozMovementX || 0;
