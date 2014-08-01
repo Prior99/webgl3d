@@ -318,7 +318,7 @@ var Game = {
                 vec3.subtract(dist, playerPos, dPos);
                 vec3.cross(tmp, dist, Player.heading);
                 var distanceToHeading = vec3.length(tmp);
-                if(distanceToHeading < 0.5) {
+                if(distanceToHeading < 0.25) {
                     var distToPlayer = vec3.length(dist);
                     if(doohickeyRes == null || distToPlayer < doohickeyDist) {
                         doohickeyRes = doohickey;
