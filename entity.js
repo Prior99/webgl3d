@@ -13,6 +13,9 @@ var Entity = function(obj) {
     };
 
     if(obj) {
+        for(var key in obj) {
+            this[key] = obj[key];
+        }
         if(obj.modelFile) {
             Graphics.loadModel(obj.modelFile, function(model) {
                 self.model = model;
@@ -23,14 +26,10 @@ var Entity = function(obj) {
                 }
             });
         }
-        if(obj.model) this.model = obj.model;
         if(obj.texture) {
             Graphics.loadTexture(obj.texture, function(tex) {
                 self.texture = tex;
             });
-        }
-        if(obj.position) {
-            this.position = obj.position;
         }
         if(obj.parent !== undefined) {
             if(obj.parent !== null) {
@@ -39,12 +38,6 @@ var Entity = function(obj) {
         }
         else {
             this.attachTo(Graphics.root);
-        }
-        if(obj.rotation) {
-            this.rotation = obj.rotation;
-        }
-        if(obj.interact) {
-            this.interact = obj.interact;
         }
         if(obj.selectable) {
             this.selectable = true;
@@ -82,6 +75,7 @@ var Entity = function(obj) {
 
     this.children = [];
     this.parent = null;
+    if(this.init) this.init();
 }
 
 Entity.prototype = {
