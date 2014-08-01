@@ -1,24 +1,22 @@
 var Graphics = {
+    renderTickHandlers : [],
+    textures : {},
+    texturesLoading : {},
+    models : {},
+    modelsLoading : {},
+    modelMatrixStack : [],
+    modelMatrix : mat4.create(),
+    viewMatrix : mat4.create(),
+    projectionMatrix : mat4.create(),
     init : function(canvas, callback) {
         this.canvas = canvas;
         this.initGL();
-        this.models = {};
-        this.modelsLoading = {};
-        this.modelMatrix = mat4.create();
-        this.viewMatrix = mat4.create();
-        this.modelMatrixStack = [];
-        this.projectionMatrix = mat4.create();
         this.initShaders(callback);
-        this.renderTickHandlers = [];
-        this.textures = {};
-        this.texturesLoading = {};
         this.root = new Entity(null);
         window.addEventListener('resize', function() { //On resize we have to resize our canvas
             Graphics.resize();
         }, false);
-
         this.lightStrength = 12;
-        this.lightPosition = Player.position;
         this.lightColor = {
             r : 1.,
             g : .95,
@@ -29,6 +27,7 @@ var Graphics = {
             g : 0,
             b : 0
         };
+        this.lightPosition = Player.position;
         this.lightStrengthFlicker = this.lightStrength;
         this.resize();
     },
