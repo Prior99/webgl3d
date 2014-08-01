@@ -10,6 +10,8 @@ var Game = {
             "sky.js",
             "button.js"
         ];
+        this.doohickeys = [];
+        this.selectedDoohickey = null;
         this.tickHandlers = [];
         setInterval(function() {
             Game.tick();
@@ -304,7 +306,33 @@ var Game = {
         this.tickHandlers.push(handler);
     },
 
+    selectDoohickey : function() {
+        if(Player.heading) {
+            var doohickeyRes = null;
+            var doohickeyDist = 0;
+            var playerPos = vec3.fromValues(Player.position.x, Player.position.y, Player.position.z);
+            var tmp = vec3.create();
+            var dist = vec3.create();
+            for(var key in this.doohickeys) {
+                var doohickey = this.doohickeys[key];
+                var dPos = vec3.fromValues(doohickey.position.x, doohickey.position.y, doohickey.position.z);
+                vec3.subtract(dist, playerPos, dPos);
+                vec3.cross(tmp, dist, Player.heading);
+                var distanceToHeading = vec3.length(tmp);
+                if(distanceToHeading < 0.5) {
+                    var distToPlayer = vec3.length(dist);
+                    if(doohickeyRes == null || distToPlayer < doohickeyDist) {
+                        doohickeyRes = doohickey;
+                        doohickeyDist = distToPlayer;
+                    }
+                }
+            }
+            this.selectedDoohickey = doohickeyRes;
+        }
+    },
+
     tick : function() {
+        this.selectDoohickey();
         for(var i in this.tickHandlers) {
             this.tickHandlers[i]();
         }

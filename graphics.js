@@ -163,16 +163,16 @@ var Graphics = {
         mat4.rotateZ(this.viewMatrix, this.viewMatrix, degToRad(Player.rotation.z));
         var tmp = mat4.create();
         mat4.transpose(tmp, this.viewMatrix);
-        var rotation = vec3.fromValues(0, 0, 1);
-        vec3.transformMat4(rotation, rotation, tmp);
-        vec3.normalize(rotation, rotation);
+        Player.heading = vec3.fromValues(0, 0, 1);
+        vec3.transformMat4(Player.heading, Player.heading, tmp);
+        vec3.normalize(Player.heading, Player.heading);
         if(Math.random() > 0.6) this.lightStrengthFlicker = this.lightStrength * (Math.random()*.2 + .9);
         mat4.translate(this.viewMatrix, this.viewMatrix, [-Player.position.x, -Player.position.y, -Player.position.z]);
         this.gl.uniform1f(this.shaderProgram.lightStrengthUniform, this.lightStrengthFlicker);
         this.gl.uniform3f(this.shaderProgram.lightPositionUniform, this.lightPosition.x, this.lightPosition.y, this.lightPosition.z);
         this.gl.uniform3f(this.shaderProgram.lightColorUniform, this.lightColor.r, this.lightColor.g, this.lightColor.b);
         this.gl.uniform3f(this.shaderProgram.ambientColorUniform, this.ambientColor.r, this.ambientColor.g, this.ambientColor.b);
-        this.gl.uniform3f(this.shaderProgram.lightDirectionUniform, rotation[0], rotation[1], rotation[2]);
+        this.gl.uniform3f(this.shaderProgram.lightDirectionUniform, Player.heading[0], Player.heading[1], Player.heading[2]);
         this.gl.uniform1i(this.shaderProgram.samplerUniform, 0);
         this.drawEntity(this.root);
         Info.reportDraw();
@@ -225,6 +225,12 @@ var Graphics = {
             }
             else {
                 this.setMatrixUniforms();
+                if(entity.isSelected()) {
+                    this.gl.uniform1i(this.shaderProgram.selectedUniform, 1);
+                }
+                else {
+                    this.gl.uniform1i(this.shaderProgram.selectedUniform, 0);
+                }
             }
 
             this.gl.drawElements(this.gl.TRIANGLES, entity.model.indexCount, this.gl.UNSIGNED_SHORT, 0);
@@ -314,6 +320,7 @@ var Graphics = {
             Graphics.shaderProgram.modelMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uModelMatrix");
             Graphics.shaderProgram.viewMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uViewMatrix");
             Graphics.shaderProgram.samplerUniform = gl.getUniformLocation(Graphics.shaderProgram, "uSampler");
+            Graphics.shaderProgram.selectedUniform = gl.getUniformLocation(Graphics.shaderProgram, "uSelected");
             callback();
         });
     },

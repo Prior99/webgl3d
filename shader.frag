@@ -7,6 +7,7 @@ uniform vec3 uLightPosition;
 uniform vec3 uLightColor;
 uniform float uLightStrength;
 uniform vec3 uLightDirection;
+uniform bool uSelected;
 
 varying vec2 vTextureCoord;
 varying vec3 vTransformedNormal;
@@ -38,5 +39,6 @@ void main(void) {
         gl_FragColor = vec4(((fragmentColor.rgb * uLightColor) / (lightInfluence * lightDistancePerColor))*uLightStrength/10., fragmentColor.a);
     }
     else gl_FragColor = vec4(uAmbientColor + fragmentColor.rgb, fragmentColor.a);
+    if(uSelected) gl_FragColor.b += 0.5;
 
 }

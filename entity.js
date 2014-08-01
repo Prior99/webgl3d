@@ -22,6 +22,10 @@ var Entity = function(obj) {
         y : 0,
         z : 0
     }
+    if(obj && obj.selectable) {
+        this.selectable = true;
+        Game.doohickeys.push(this);
+    }
     this.children = [];
     this.parent = null;
     if(obj && obj.shaders) {
@@ -55,6 +59,10 @@ var Entity = function(obj) {
 }
 
 Entity.prototype = {
+    isSelected : function() {
+        return Game.selectedDoohickey == this;
+    },
+
     rotate : function(x, y, z) {
         this.rotation.x += x;
         this.rotation.y += y;
