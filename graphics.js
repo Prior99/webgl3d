@@ -231,7 +231,7 @@ var Graphics = {
             this.gl.vertexAttribPointer(shaderToBind.normalsAttribute, 3, this.gl.FLOAT, false, 0, 0);
 
             this.gl.activeTexture(this.gl.TEXTURE0);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, entity.texture);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, entity.boundTexture);
 
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, entity.model.faces);
             if(entity.shader) {

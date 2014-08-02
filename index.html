@@ -66,30 +66,41 @@
 
                 Game.init($("#webgl")[0], "maps/test.js", function(models) {
                     console.log("Game started.");
-                    new Entity({
-                        modelFile : "button.js",
-                        selectable : true,
-                        interact : function() {
-                            console.log("BADABOOM");
-                        },
-                        position: {x : 3, y : 0, z : 0.75},
-                        rotation : {x : 0, y : 180, z : 0}
-                    });
-                    new Entity({
+                    Graphics.root.removeAt(6, 0, 2);
+                    var door = new Entity({
                         modelFile : "door.js",
                         selectable : true,
                         moveDelta : 0,
+                        radius : 0.2,
                         moveUp : function() {
-
+                            this.moveDelta = 0.01;
                         },
                         interact : function() {
                             this.moveUp();
                         },
                         tick : function() {
-                            this.move(0, 0.01, 0);
+                            this.move(0, this.moveDelta, 0);
+                            if(this.position.y > 1.5) {
+                                Game.unblock(this.position.x, this.position.z);
+                            }
+                            if(this.position.y > 2) {
+                                this.moveDelta = 0;
+                            }
                         },
-                        position: {x : 4, y : 0, z : 1},
+                        init : function (){
+                            Game.block(this.position.x, this.position.z);
+                        },
+                        position: {x : 6, y : 0, z : 2},
                         rotation : {x : 0, y : 90, z : 0}
+                    });
+                    new Entity({
+                        modelFile : "button.js",
+                        selectable : true,
+                        interact : function() {
+                            door.interact();
+                        },
+                        position: {x : 3, y : 0, z : 0.75},
+                        rotation : {x : 0, y : 180, z : 0}
                     });
                 });
 

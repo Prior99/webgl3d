@@ -114,6 +114,14 @@ var Game = {
         });
     },
 
+    block : function(x, y) {
+        this.map[y][x] = true;
+    },
+
+    unblock : function(x, y) {
+        this.map[y][x] = false;
+    },
+
     generateCeiling : function(width, height) {
         return new Model({
             name : "ceiling",
@@ -298,7 +306,8 @@ var Game = {
                 vec3.subtract(dist, playerPos, dPos);
                 vec3.cross(tmp, dist, Player.heading);
                 var distanceToHeading = vec3.length(tmp);
-                if(distanceToHeading < 0.25) {
+                var radius = doohickey.radius ? doohickey.radius : .25;
+                if(distanceToHeading < radius) {
                     var distToPlayer = vec3.length(dist);
                     if(doohickeyRes == null || distToPlayer < doohickeyDist) {
                         doohickeyRes = doohickey;

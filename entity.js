@@ -21,14 +21,14 @@ var Entity = function(obj) {
                 self.model = model;
                 if(!self.texture && self.model && self.model.texture) {
                     Graphics.loadTexture(self.model.texture, function(tex) {
-                        self.texture = tex;
+                        self.boundTexture = tex;
                     });
                 }
             });
         }
         if(obj.texture) {
             Graphics.loadTexture(obj.texture, function(tex) {
-                self.texture = tex;
+                self.boundTexture = tex;
             });
         }
         if(obj.parent !== undefined) {
@@ -74,11 +74,22 @@ var Entity = function(obj) {
     }
 
     this.children = [];
-    this.parent = null;
     if(this.init) this.init();
 }
 
 Entity.prototype = {
+    removeAt : function(x, y, z) {
+        var l = [];
+        var len = this.children.length;
+        for(var key = 0; key < len; key++) {
+            var g = this.children[key];
+            if(g && g.position.y == y && g.position.z == z && g.position.x == x) {
+                g.detach();
+                return;
+            }
+        }
+    },
+
     isSelected : function() {
         return Game.selectedDoohickey == this;
     },
@@ -129,20 +140,23 @@ Entity.prototype = {
             console.error("Invalid entity!");
         }
         entity.attachChild(this);
+        this.parent = entity;
         return this;
     },
 
     detach : function() {
-        this.parent.detachChild(this);
+        if(this.parent !== undefined && this.parent !== null) {
+            this.parent.detachChild(this);
+            //this.parent = null;
+        }
         return this;
     },
 
     detachChild : function(entity) {
         var i;
-        if(i = this.children.indexOf(entity) != -1) {
+        if((i = this.children.indexOf(entity)) != -1) {
             this.children.splice(i, 1);
         }
-        entity.parent = null;
         return this;
     },
 
