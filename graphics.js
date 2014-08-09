@@ -196,6 +196,7 @@ var Graphics = {
     },
 
     drawEntity : function(entity) {
+        if(entity.invisible) return;
         if(entity.tick) entity.tick();
         this.push();
         mat4.translate(this.modelMatrix, this.modelMatrix, [entity.position.x, entity.position.y, entity.position.z]);
@@ -244,6 +245,12 @@ var Graphics = {
                 }
                 else {
                     this.gl.uniform1i(this.shaderProgram.selectedUniform, 0);
+                }
+                if(entity.ignoreLighting) {
+                    this.gl.uniform1i(this.shaderProgram.ignoreLighting, 1);
+                }
+                else {
+                    this.gl.uniform1i(this.shaderProgram.ignoreLighting, 0);
                 }
             }
 
@@ -335,6 +342,7 @@ var Graphics = {
             Graphics.shaderProgram.viewMatrixUniform = gl.getUniformLocation(Graphics.shaderProgram, "uViewMatrix");
             Graphics.shaderProgram.samplerUniform = gl.getUniformLocation(Graphics.shaderProgram, "uSampler");
             Graphics.shaderProgram.selectedUniform = gl.getUniformLocation(Graphics.shaderProgram, "uSelected");
+            Graphics.shaderProgram.ignoreLighting = gl.getUniformLocation(Graphics.shaderProgram, "uIgnoreLighting");
             callback();
         });
     },

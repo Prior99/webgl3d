@@ -21,6 +21,16 @@ var Player = {
     joggingScale : 0.05,
     joggingAngle : 0,
     init : function(x, y) {
+        var self = this;
+        this.laser = new Entity({
+            modelFile : "laser.js",
+            position : Player.position,
+            ignoreLighting : true,
+            invisible : true,
+            tick : function() {
+                this.rotation.y = -Player.rotation.y + 180;
+            }
+        });
 		this.position.x = x;
 		this.position.z = y;
         Graphics.root.move(0, -0.3, 0);
@@ -64,6 +74,12 @@ var Player = {
             if(e.which == 68) Player.currentKeyboard.d = false;
         });
         document.addEventListener("mouseup", function(e) {
+            self.laser.invisible = true;
+            if(Game.selectedDoohickey)
+                Game.selectedDoohickey.interact();
+        });
+        document.addEventListener("mousedown", function(e) {
+            self.laser.invisible = false;
             if(Game.selectedDoohickey)
                 Game.selectedDoohickey.interact();
         });
