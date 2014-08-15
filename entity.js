@@ -39,9 +39,9 @@ var Entity = function(obj) {
         else {
             this.attachTo(Graphics.root);
         }
-        if(obj.selectable) {
-            this.selectable = true;
-            Game.doohickeys.push(this);
+        if(obj.receiver) {
+            this.receiver = true;
+            Game.receivers.push(this);
         }
         if(obj.shaders) {
             var self = this;
@@ -91,7 +91,7 @@ Entity.prototype = {
     },
 
     isSelected : function() {
-        return Game.selectedDoohickey == this;
+        return Game.selectedReceiver == this;
     },
 
     interact : function() {

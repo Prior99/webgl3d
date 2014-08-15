@@ -1,8 +1,7 @@
 var Game = {
+    receivers : [],
+    tickHandlers : [],
     init : function(canvas, map, callback){
-        this.doohickeys = [];
-        this.selectedDoohickey = null;
-        this.tickHandlers = [];
         setInterval(function() {
             Game.tick();
         }, 1000/60);
@@ -293,34 +292,38 @@ var Game = {
         this.tickHandlers.push(handler);
     },
 
-    selectDoohickey : function() {
-        if(Player.heading) {
-            var doohickeyRes = null;
-            var doohickeyDist = 0;
-            var playerPos = vec3.fromValues(Player.position.x, Player.position.y, Player.position.z);
-            var tmp = vec3.create();
-            var dist = vec3.create();
-            for(var key in this.doohickeys) {
-                var doohickey = this.doohickeys[key];
-                var dPos = vec3.fromValues(doohickey.position.x, doohickey.position.y, doohickey.position.z);
-                vec3.subtract(dist, playerPos, dPos);
-                vec3.cross(tmp, dist, Player.heading);
-                var distanceToHeading = vec3.length(tmp);
-                var radius = doohickey.radius ? doohickey.radius : .25;
-                if(distanceToHeading < radius) {
-                    var distToPlayer = vec3.length(dist);
-                    if(doohickeyRes == null || distToPlayer < doohickeyDist) {
-                        doohickeyRes = doohickey;
-                        doohickeyDist = distToPlayer;
-                    }
-                }
+    tickReceivers : function() {
+        this.selectedReceiver = null;
+        for(var r in this.receivers) {
+            var receiver = this.receivers[r];
+            var h = {
+                x : Math.sin(degToRad(Player.rotation.y)),
+                z : -Math.cos(degToRad(Player.rotation.y))
+            };
+            var n = {
+                x : -h.z,
+                z : h.x
+            };
+            var len = Math.abs(
+                    n.x*(receiver.position.x - Player.position.x) +
+                    n.z*(receiver.position.z - Player.position.z)
+                )/Math.sqrt(h.x*h.x + h.z*h.z);
+            console.log(len + "<" + receiver.radius +
+                " | " + Player.position.x + "," + Player.position.z +
+                " | " + receiver.position.x + "," + receiver.position.z +
+                " | " + h.x + "," + h.z
+            );
+            if(len < receiver.radius) {
+                this.selectedReceiver = receiver;
+                receiver.interact();
             }
-            this.selectedDoohickey = doohickeyRes;
         }
     },
 
     tick : function() {
-        this.selectDoohickey();
+        if(Player.firing) {
+            this.tickReceivers();
+        }
         for(var i in this.tickHandlers) {
             this.tickHandlers[i]();
         }

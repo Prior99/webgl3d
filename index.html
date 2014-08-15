@@ -69,22 +69,14 @@
                     Graphics.root.removeAt(6, 0, 2);
                     var door = new Entity({
                         modelFile : "door.js",
-                        selectable : true,
-                        moveDelta : 0,
-                        radius : 0.2,
-                        moveUp : function() {
-                            this.moveDelta = 0.01;
-                        },
+                        moveDelta : .01,
                         interact : function() {
-                            this.moveUp();
-                        },
-                        tick : function() {
-                            this.move(0, this.moveDelta, 0);
-                            if(this.position.y > 1.5) {
-                                Game.unblock(this.position.x, this.position.z);
+                            this.position.y += this.moveDelta;
+                            if(this.position.y >= 2) {
+                                this.moveDelta = -.01;
                             }
-                            if(this.position.y > 2) {
-                                this.moveDelta = 0;
+                            if(this.position.y <= 0) {
+                                this.moveDelta = .01;
                             }
                         },
                         init : function (){
@@ -93,13 +85,15 @@
                         position: {x : 6, y : 0, z : 2},
                         rotation : {x : 0, y : 90, z : 0}
                     });
+
                     new Entity({
                         modelFile : "button.js",
-                        selectable : true,
+                        receiver : true,
+                        radius : 0.05,
                         interact : function() {
                             door.interact();
                         },
-                        position: {x : 3, y : 0, z : 0.75},
+                        position: {x : 3, y : 0, z : 0.25},
                         rotation : {x : 0, y : 180, z : 0}
                     });
                 });

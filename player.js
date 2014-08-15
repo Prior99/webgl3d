@@ -75,13 +75,11 @@ var Player = {
         });
         document.addEventListener("mouseup", function(e) {
             self.laser.invisible = true;
-            if(Game.selectedDoohickey)
-                Game.selectedDoohickey.interact();
+            self.firing = false;
         });
         document.addEventListener("mousedown", function(e) {
             self.laser.invisible = false;
-            if(Game.selectedDoohickey)
-                Game.selectedDoohickey.interact();
+            self.firing = true;
         });
         document.addEventListener("mousemove", function(e) {
 			if(!isPointerLocked()) return;
